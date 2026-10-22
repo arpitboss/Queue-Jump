@@ -1,5 +1,8 @@
-﻿node_modules/
+﻿# Root gitignore
+node_modules/
 dist/
+.next/
+out/
 .env
 *.log
 .DS_Store
