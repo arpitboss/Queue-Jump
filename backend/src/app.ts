@@ -1,7 +1,10 @@
 import express, { Request, Response, NextFunction } from "express";
 import helmet from "helmet";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import { healthRouter } from "./modules/health/health.router";
+import { tenantRouter } from "./modules/tenant/tenant.router";
+import { campaignRouter } from "./modules/campaign/campaign.router";
 import { errorHandler } from "./middlewares/errorHandler";
 import { NotFoundError } from "./utils/errors";
 import { env } from "./config/env";
@@ -15,9 +18,7 @@ app.use(
   })
 );
 
-// CORS configuration:
-// Public waitlist/widget endpoints will have open CORS;
-// other endpoints allow APP_URL or localhost in dev.
+// CORS configuration
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -30,9 +31,10 @@ app.use(
   })
 );
 
-// Body parsers with size limit
+// Body & cookie parsers
 app.use(express.json({ limit: "100kb" }));
 app.use(express.urlencoded({ extended: true, limit: "100kb" }));
+app.use(cookieParser());
 
 // Root ping
 app.get("/", (_req: Request, res: Response) => {
@@ -44,8 +46,10 @@ app.get("/", (_req: Request, res: Response) => {
   });
 });
 
-// Health check endpoint
+// Routes
 app.use("/api/v1/health", healthRouter);
+app.use("/api/v1/tenants", tenantRouter);
+app.use("/api/v1/campaigns", campaignRouter);
 
 // 404 catch-all
 app.use((req: Request, _res: Response, next: NextFunction) => {
