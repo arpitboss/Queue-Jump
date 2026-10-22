@@ -291,12 +291,41 @@ export class ParticipantService {
       throw new RateLimitError("Demo simulation rate limit reached. Please wait a minute.");
     }
 
-    const participant = await prisma.participant.findUnique({
-      where: { referralCode },
-    });
+    let participant = null;
 
-    if (!participant || participant.campaignId !== campaign.id) {
-      throw new NotFoundError("Participant not found for simulation.", "PARTICIPANT_NOT_FOUND");
+    if (referralCode && typeof referralCode === "string" && referralCode.trim().length > 0) {
+      participant = await prisma.participant.findUnique({
+        where: { referralCode: referralCode.trim() },
+      });
+    }
+
+    // If not found by referral code, pick the latest participant in this demo campaign
+    if (!participant) {
+      participant = await prisma.participant.findFirst({
+        where: { campaignId: campaign.id },
+        orderBy: { joinedAt: "desc" },
+      });
+    }
+
+    // If no participant exists at all in this demo campaign, create a synthetic starter participant
+    if (!participant) {
+      const initialCode = `demo-${Math.random().toString(36).substring(2, 6)}`;
+      participant = await prisma.participant.create({
+        data: {
+          campaignId: campaign.id,
+          rawEmail: `founder_${Date.now()}@queuejump.dev`,
+          canonicalEmail: `founder_${Date.now()}@queuejump.dev`,
+          referralCode: initialCode,
+          status: "VERIFIED",
+          ipAddress,
+        },
+      });
+
+      await leaderboardService.addParticipant(
+        campaign.id,
+        participant.id,
+        leaderboardService.calculateScore(new Date(), 0, campaign.referralBonusSec)
+      );
     }
 
     const startLatency = performance.now();

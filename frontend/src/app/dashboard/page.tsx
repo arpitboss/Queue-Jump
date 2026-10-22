@@ -42,8 +42,28 @@ export default function DashboardPage() {
   const selectedCampaign = campaigns.find((c) => c.id === selectedCampaignId) || campaigns[0];
 
   const loadData = useCallback(async () => {
+    let token = typeof window !== "undefined" ? localStorage.getItem("queuejump_token") : null;
+    if (!token) {
+      try {
+        const loginRes = await apiRequest<{ accessToken: string }>("/api/v1/tenants/login", {
+          method: "POST",
+          body: JSON.stringify({ email: "demo@queuejump.dev", password: "demopassword123" }),
+        });
+        token = loginRes.accessToken;
+        if (typeof window !== "undefined") {
+          localStorage.setItem("queuejump_token", token);
+        }
+      } catch {
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
-      const campData = await apiRequest<{ campaigns: Campaign[] }>("/api/v1/campaigns");
+      const campData = await apiRequest<{ campaigns: Campaign[] }>("/api/v1/campaigns", { token: token || undefined });
       setCampaigns(campData.campaigns || []);
 
       if (campData.campaigns && campData.campaigns.length > 0) {
@@ -59,7 +79,8 @@ export default function DashboardPage() {
             { campaignKey: activeCamp.publicKey }
           ).catch(() => ({ leaderboard: [], total: 0 })),
           apiRequest<{ logs: FraudBlockLogItem[]; total: number }>(
-            `/api/v1/campaigns/${activeCamp.id}/fraud-logs?limit=50`
+            `/api/v1/campaigns/${activeCamp.id}/fraud-logs?limit=50`,
+            { token: token || undefined }
           ).catch(() => ({ logs: [], total: 0 })),
         ]);
 
@@ -67,8 +88,12 @@ export default function DashboardPage() {
         setTotalParticipants(lbData.total || 0);
         setFraudLogs(fraudData.logs || []);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Dashboard fetch error:", err);
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("queuejump_token");
+        window.location.href = "/login";
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
