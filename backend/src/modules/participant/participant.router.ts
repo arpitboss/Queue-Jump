@@ -1,12 +1,21 @@
 import { Router } from "express";
-import { handleJoinWaitlist, handleGetStatus, handleGetLeaderboard } from "./participant.controller";
+import {
+  handleJoinWaitlist,
+  handleVerifyEmail,
+  handleDemoSimulate,
+  handleGetStatus,
+  handleGetLeaderboard,
+} from "./participant.controller";
 import { apiKeyAuth } from "../../middlewares/apiKeyAuth";
 
 export const participantRouter = Router();
 
-// All waitlist participant endpoints require X-Campaign-Key
-participantRouter.use(apiKeyAuth);
+// Public verification callback endpoint (no campaign key needed)
+participantRouter.post("/verify", handleVerifyEmail);
+participantRouter.get("/verify", handleVerifyEmail);
 
-participantRouter.post("/join", handleJoinWaitlist);
-participantRouter.get("/status/:referralCode", handleGetStatus);
-participantRouter.get("/leaderboard", handleGetLeaderboard);
+// Endpoints requiring X-Campaign-Key
+participantRouter.post("/join", apiKeyAuth, handleJoinWaitlist);
+participantRouter.post("/demo-simulate", apiKeyAuth, handleDemoSimulate);
+participantRouter.get("/status/:referralCode", apiKeyAuth, handleGetStatus);
+participantRouter.get("/leaderboard", apiKeyAuth, handleGetLeaderboard);

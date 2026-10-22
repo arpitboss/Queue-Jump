@@ -3,7 +3,10 @@ import { prisma } from "../../config/db";
 import { leaderboardService } from "../leaderboard/leaderboard.service";
 import { fraudService } from "../fraud/fraud.service";
 import { generateReferralCode } from "../../utils/referralCode";
-import { NotFoundError } from "../../utils/errors";
+import { NotFoundError, AppError, ForbiddenError, RateLimitError } from "../../utils/errors";
+import { dispatchWebhook } from "../../jobs/webhookJob";
+import { dispatchEmail } from "../../jobs/emailJob";
+import { checkRateLimit } from "../../middlewares/rateLimiter";
 import { env } from "../../config/env";
 
 export interface CampaignContext {
@@ -11,6 +14,8 @@ export interface CampaignContext {
   name: string;
   publicKey: string;
   referralBonusSec: number;
+  webhookUrl: string | null;
+  webhookSecret: string | null;
   milestonesJson: unknown;
   isDemo: boolean;
 }
@@ -118,7 +123,18 @@ export class ParticipantService {
     const initialScore = leaderboardService.calculateScore(joinedAt, 0, campaign.referralBonusSec);
     await leaderboardService.addParticipant(campaign.id, participant.id, initialScore);
 
-    // 7. Get real-time rank and total
+    // 7. Enqueue double-opt-in verification email
+    await dispatchEmail({
+      to: rawEmail,
+      type: "verification",
+      subject: `Verify your email for ${campaign.name}`,
+      variables: {
+        verifyUrl: `${env.API_URL}/api/v1/waitlist/verify?token=${verificationToken}`,
+        campaignName: campaign.name,
+      },
+    });
+
+    // 8. Get real-time rank and total
     const { position, total } = await leaderboardService.getRankTelemetry(campaign.id, participant.id);
     const nextMilestone = milestones.find((m: any) => m.count > 0) || null;
 
@@ -132,6 +148,190 @@ export class ParticipantService {
       verifiedReferrals: 0,
       nextMilestone,
       status: participant.status,
+    };
+  }
+
+  async verifyEmail(token: string) {
+    if (!token || typeof token !== "string") {
+      throw new AppError("Verification token is required", 400, "MISSING_TOKEN");
+    }
+
+    // Atomic interactive transaction to guarantee single crediting
+    const result = await prisma.$transaction(async (tx) => {
+      const participant = await tx.participant.findUnique({
+        where: { verificationToken: token },
+        include: {
+          campaign: true,
+          referredBy: true,
+        },
+      });
+
+      if (!participant || participant.status !== "PENDING") {
+        throw new AppError(
+          "Invalid, expired, or already-verified confirmation token.",
+          400,
+          "INVALID_TOKEN"
+        );
+      }
+
+      // Mark verified
+      const updated = await tx.participant.update({
+        where: { id: participant.id },
+        data: {
+          status: "VERIFIED",
+          verifiedAt: new Date(),
+          verificationToken: null,
+        },
+      });
+
+      let referrerUpdated: any = null;
+      let milestoneUnlocked: any = null;
+
+      // Credit referrer if one exists
+      if (participant.referredById && participant.referredBy) {
+        referrerUpdated = await tx.participant.update({
+          where: { id: participant.referredById },
+          data: {
+            verifiedReferrals: { increment: 1 },
+          },
+        });
+
+        // Check milestones
+        const milestones =
+          typeof participant.campaign.milestonesJson === "string"
+            ? JSON.parse(participant.campaign.milestonesJson)
+            : (participant.campaign.milestonesJson as any[]) || [];
+
+        milestoneUnlocked = milestones.find((m: any) => m.count === referrerUpdated.verifiedReferrals) || null;
+      }
+
+      return {
+        participant: updated,
+        campaign: participant.campaign,
+        referrer: referrerUpdated,
+        milestoneUnlocked,
+      };
+    });
+
+    // Redis rank jump for referrer (executed outside DB transaction)
+    if (result.referrer) {
+      await leaderboardService.jumpParticipant(
+        result.campaign.id,
+        result.referrer.id,
+        result.campaign.referralBonusSec
+      );
+
+      // Trigger Webhook & Email for milestone if crossed
+      if (result.milestoneUnlocked && result.campaign.webhookUrl && result.campaign.webhookSecret) {
+        await dispatchWebhook({
+          campaignId: result.campaign.id,
+          webhookUrl: result.campaign.webhookUrl,
+          webhookSecret: result.campaign.webhookSecret,
+          eventType: "milestone.unlocked",
+          payload: {
+            referrerId: result.referrer.id,
+            referralCode: result.referrer.referralCode,
+            verifiedReferrals: result.referrer.verifiedReferrals,
+            milestone: result.milestoneUnlocked,
+          },
+        });
+
+        await dispatchEmail({
+          to: result.referrer.rawEmail,
+          type: "milestone",
+          subject: `Reward Unlocked: ${result.milestoneUnlocked.reward}!`,
+          variables: {
+            reward: result.milestoneUnlocked.reward,
+            campaignName: result.campaign.name,
+          },
+        });
+      }
+
+      // Trigger Webhook for participant verified
+      if (result.campaign.webhookUrl && result.campaign.webhookSecret) {
+        await dispatchWebhook({
+          campaignId: result.campaign.id,
+          webhookUrl: result.campaign.webhookUrl,
+          webhookSecret: result.campaign.webhookSecret,
+          eventType: "participant.verified",
+          payload: {
+            participantId: result.participant.id,
+            canonicalEmail: result.participant.canonicalEmail,
+            referralCode: result.participant.referralCode,
+            referrerId: result.referrer.id,
+          },
+        });
+      }
+    }
+
+    const { position, total } = await leaderboardService.getRankTelemetry(
+      result.campaign.id,
+      result.participant.id
+    );
+
+    return {
+      success: true,
+      message: "Email successfully verified. Your waitlist position is confirmed!",
+      position: position ?? 1,
+      totalParticipants: total,
+    };
+  }
+
+  async demoSimulateReferral(campaign: CampaignContext, referralCode: string, ipAddress: string) {
+    if (!campaign.isDemo) {
+      throw new ForbiddenError(
+        "Referral simulation is only permitted in the Interactive Demo Playground.",
+        "DEMO_ONLY_ENDPOINT"
+      );
+    }
+
+    // Rate limit simulation to avoid abuse (max 10 per minute per IP)
+    const rateCheck = await checkRateLimit(`demo_sim:${ipAddress}`, 10, 60);
+    if (!rateCheck.allowed) {
+      throw new RateLimitError("Demo simulation rate limit reached. Please wait a minute.");
+    }
+
+    const participant = await prisma.participant.findUnique({
+      where: { referralCode },
+    });
+
+    if (!participant || participant.campaignId !== campaign.id) {
+      throw new NotFoundError("Participant not found for simulation.", "PARTICIPANT_NOT_FOUND");
+    }
+
+    const startLatency = performance.now();
+
+    // 1. Get old position
+    const { position: oldPosition } = await leaderboardService.getRankTelemetry(campaign.id, participant.id);
+
+    // 2. Increment in Postgres
+    const updated = await prisma.participant.update({
+      where: { id: participant.id },
+      data: {
+        verifiedReferrals: { increment: 1 },
+      },
+    });
+
+    // 3. Jump score in Redis
+    await leaderboardService.jumpParticipant(campaign.id, participant.id, campaign.referralBonusSec);
+
+    // 4. Get new position
+    const { position: newPosition, total } = await leaderboardService.getRankTelemetry(campaign.id, participant.id);
+
+    const redisLatencyMs = parseFloat((performance.now() - startLatency).toFixed(2));
+    const previous = oldPosition ?? 1;
+    const current = newPosition ?? 1;
+    const spotsJumped = Math.max(0, previous - current);
+
+    return {
+      participantId: participant.id,
+      referralCode: participant.referralCode,
+      previousPosition: previous,
+      newPosition: current,
+      spotsJumped,
+      verifiedReferrals: updated.verifiedReferrals,
+      totalParticipants: total,
+      redisLatencyMs,
     };
   }
 

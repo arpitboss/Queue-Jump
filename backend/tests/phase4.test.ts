@@ -1,3 +1,10 @@
+vi.mock("../src/jobs/emailJob", () => ({
+  dispatchEmail: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock("../src/jobs/webhookJob", () => ({
+  dispatchWebhook: vi.fn().mockResolvedValue(undefined),
+}));
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import request from "supertest";
 import { app } from "../src/app";

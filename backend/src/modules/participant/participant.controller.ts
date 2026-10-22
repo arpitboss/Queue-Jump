@@ -26,6 +26,36 @@ export async function handleJoinWaitlist(req: Request, res: Response, next: Next
   }
 }
 
+export async function handleVerifyEmail(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const token = (req.query.token as string) || req.body?.token;
+    const result = await participantService.verifyEmail(token);
+    res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function handleDemoSimulate(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const referralCode = req.body?.referralCode;
+    const ipAddress =
+      (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+      req.socket.remoteAddress ||
+      "127.0.0.1";
+
+    const result = await participantService.demoSimulateReferral(
+      req.campaign as any,
+      referralCode,
+      ipAddress
+    );
+
+    res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function handleGetStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const referralCode = req.params.referralCode as string;
