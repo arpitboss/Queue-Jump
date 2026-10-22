@@ -7,7 +7,7 @@ import { Footer } from "@/components/landing/Footer";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-[#09090B] text-zinc-100 selection:bg-orange-500 selection:text-white">
+    <main className="min-h-screen bg-white text-[#0A0A0A] selection:bg-[#3074FE]/12 selection:text-[#3074FE]">
       <Navbar />
       <HeroSection />
       <BentoGrid />

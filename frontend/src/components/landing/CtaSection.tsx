@@ -1,34 +1,33 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Zap } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export function CtaSection() {
   return (
-    <section className="py-20 md:py-24 border-t border-white/5 bg-[#09090B] relative overflow-hidden">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-orange-500/10 blur-[140px] pointer-events-none -z-10" />
-
-      <div className="max-w-4xl mx-auto px-4 text-center space-y-6">
-        <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-[#FF4F00] flex items-center justify-center mx-auto shadow-lg shadow-orange-500/10">
-          <Zap className="w-6 h-6 fill-[#FF4F00]" />
-        </div>
-
-        <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-tight">
-          Ready to launch your viral waitlist?
+    <section className="py-20 border-t border-black/[0.06] bg-[#F7F7F8]">
+      <div className="max-w-xl mx-auto px-4 text-center">
+        <h2 className="text-2xl sm:text-[28px] font-semibold tracking-tight text-[#0A0A0A] mb-3">
+          Start collecting referrals before launch.
         </h2>
-
-        <p className="text-base text-zinc-400 max-w-xl mx-auto">
-          Start turning your pre-launch traffic into a self-sustaining viral loop in under two minutes.
+        <p className="text-[14px] text-[#737373] mb-7 max-w-md mx-auto leading-relaxed">
+          Set up a campaign in under 5 minutes and give your earliest supporters a reason to spread the word.
         </p>
-
-        <div className="pt-2">
+        <div className="flex items-center justify-center gap-2.5">
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-2 bg-[#FF4F00] hover:bg-[#FF661A] text-white font-semibold text-sm px-6 py-3.5 rounded-xl transition shadow-xl shadow-orange-500/25 active:scale-[0.98]"
+            className="inline-flex items-center gap-2 bg-[#0A0A0A] hover:bg-neutral-800 text-white text-[13px] font-medium px-4 py-2 rounded-full transition shadow-sm"
           >
-            <span>Open Founder Dashboard</span>
-            <ArrowRight className="w-4 h-4" />
+            Create a waitlist <ArrowRight className="w-3.5 h-3.5" />
           </Link>
+          <a
+            href="http://localhost:4000/api/docs"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-white hover:bg-[#EFEFEF] text-[#0A0A0A] border border-black/[0.08] text-[13px] font-medium px-4 py-2 rounded-full transition"
+          >
+            API Documentation
+          </a>
         </div>
       </div>
     </section>

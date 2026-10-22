@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Zap, Check, Copy, Share2, Sparkles, AlertCircle, ArrowRight, ShieldCheck, Gift } from "lucide-react";
+import { Check, Copy } from "lucide-react";
 import confetti from "canvas-confetti";
 import { OdometerNumber } from "../widget/OdometerNumber";
 import { apiRequest } from "@/lib/api";
@@ -35,13 +35,13 @@ export function LivePlayground() {
       setParticipant(data);
 
       confetti({
-        particleCount: 50,
-        spread: 60,
-        origin: { y: 0.75 },
-        colors: ["#FF4F00", "#10B981", "#FFFFFF"],
+        particleCount: 35,
+        spread: 50,
+        origin: { y: 0.7 },
+        colors: ["#3074FE", "#0A0A0A", "#14804A"],
       });
     } catch (err: any) {
-      setError(err.message || "Unable to reach waitlist server. Please ensure the backend is running.");
+      setError(err.message || "Unable to reach waitlist server. Please check the backend connection.");
     } finally {
       setLoading(false);
     }
@@ -69,6 +69,7 @@ export function LivePlayground() {
         body: JSON.stringify({ referralCode: participant.referralCode }),
       });
 
+      setSpotsJumped(result.spotsJumped);
       setParticipant((prev) =>
         prev
           ? {
@@ -80,245 +81,199 @@ export function LivePlayground() {
           : null
       );
 
-      setSpotsJumped(result.spotsJumped);
-
       confetti({
-        particleCount: 80,
-        spread: 80,
-        origin: { y: 0.65 },
-        colors: ["#FF4F00", "#FFD700", "#10B981"],
+        particleCount: 30,
+        spread: 45,
+        origin: { y: 0.7 },
+        colors: ["#3074FE", "#14804A"],
       });
 
-      setTimeout(() => setSpotsJumped(null), 3500);
+      setTimeout(() => setSpotsJumped(null), 3000);
     } catch (err: any) {
-      setError(err.message || "Failed to simulate referral.");
+      setError(err.message || "Demo simulation failed. Please try again.");
     } finally {
       setSimulating(false);
     }
   }
 
-  function copyReferralLink() {
+  function handleCopy() {
     if (!participant) return;
     navigator.clipboard.writeText(participant.referralLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
 
-  function shareToTwitter() {
-    if (!participant) return;
-    const text = encodeURIComponent(`Just joined the waitlist for QueueJump! Use my invite link to skip the line: ${participant.referralLink}`);
-    window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
+  function handleReset() {
+    setParticipant(null);
+    setEmail("");
+    setError(null);
+    setSpotsJumped(null);
   }
 
   return (
-    <div className="relative w-full max-w-lg mx-auto">
-      {/* Subtle Ambient Glow */}
-      <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-orange-500/20 via-amber-500/10 to-orange-500/20 blur-xl opacity-75 pointer-events-none -z-10" />
-
-      <div className="bg-[#111116] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl relative">
-        {/* Top Header Badge */}
-        <div className="flex items-center justify-between pb-5 mb-5 border-b border-white/5">
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-            </span>
-            <span className="text-xs font-medium text-emerald-400 tracking-wide">
-              Live Subscriber Experience
-            </span>
-          </div>
-
-          <span className="text-[11px] text-zinc-400 bg-white/5 border border-white/5 px-2.5 py-1 rounded-full">
-            Interactive Preview
-          </span>
+    <div className="glass-panel rounded-2xl overflow-hidden text-left">
+      {/* Widget Header */}
+      <div className="px-5 py-3 bg-white/70 border-b border-black/[0.05] flex items-center justify-between text-[11.5px]">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-[#14804A]" />
+          <span className="font-medium text-[#0A0A0A]">Live Widget Preview</span>
         </div>
+        <span className="text-[#8C8C8C] font-mono">Demo Mode</span>
+      </div>
 
+      <div className="p-6">
         <AnimatePresence mode="wait">
           {!participant ? (
-            /* STEP 1: Enter Email or Quick Demo */
             <motion.div
-              key="signup"
-              initial={{ opacity: 0, y: 8 }}
+              key="join-form"
+              initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.12 }}
             >
-              <div className="mb-6">
-                <h3 className="text-xl font-semibold text-white tracking-tight">
-                  See how visitors experience your waitlist
+              <div className="text-center mb-5">
+                <h3 className="text-[16px] font-semibold text-[#0A0A0A] mb-1">
+                  Join the pre-launch waitlist
                 </h3>
-                <p className="text-sm text-zinc-400 mt-1.5 leading-relaxed">
-                  Subscribers get an instant queue number and a personalized link to invite friends and skip the line.
+                <p className="text-[13px] text-[#737373]">
+                  Enter an email to receive your queue spot and invite link.
                 </p>
               </div>
 
-              <form onSubmit={handleJoin} className="space-y-4">
-                <div className="space-y-1">
+              <form onSubmit={handleJoin} className="space-y-3">
+                <div className="flex gap-2">
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="name@company.com"
+                    placeholder="you@company.com"
                     required
-                    className="w-full bg-[#181820] border border-white/10 focus:border-[#FF4F00] focus:ring-1 focus:ring-[#FF4F00] rounded-xl px-4 py-3.5 text-sm text-white placeholder-zinc-500 outline-none transition"
+                    disabled={loading}
+                    className="flex-1 bg-white border border-black/[0.09] shadow-inner rounded-xl px-3.5 py-2 text-[13px] text-[#0A0A0A] placeholder-[#A1A1A1] focus:outline-none focus:border-[#3074FE] transition"
                   />
-                  {error && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      className="flex items-center gap-1.5 text-xs text-red-400 pt-1.5"
-                    >
-                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                      <span>{error}</span>
-                    </motion.div>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <button
                     type="submit"
-                    disabled={loading}
-                    className="w-full bg-[#FF4F00] hover:bg-[#FF661A] active:scale-[0.99] text-white font-medium text-sm py-3 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20 disabled:opacity-50 cursor-pointer"
+                    disabled={loading || !email.trim()}
+                    className="btn-vibrant-dark text-[13px] font-medium px-4 py-2 shrink-0 cursor-pointer disabled:opacity-50"
                   >
-                    {loading ? (
-                      <span className="inline-block animate-pulse">Reserving spot...</span>
-                    ) : (
-                      <>
-                        <span>Join Waitlist</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </>
-                    )}
+                    {loading ? "Joining..." : "Join"}
                   </button>
+                </div>
 
+                <div className="flex items-center justify-between pt-0.5">
                   <button
                     type="button"
                     onClick={handleQuickDemo}
                     disabled={loading}
-                    className="w-full bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white font-medium text-sm py-3 px-4 rounded-xl border border-white/10 transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    className="text-[12px] text-[#3074FE] hover:underline font-medium cursor-pointer"
                   >
-                    <Sparkles className="w-4 h-4 text-amber-400" />
-                    <span>Try 1-Click Demo</span>
+                    Fill sample email
                   </button>
+                  <span className="text-[11.5px] text-[#A1A1A1]">Instant preview</span>
                 </div>
               </form>
 
-              <div className="mt-5 flex items-center justify-between text-xs text-zinc-500 pt-4 border-t border-white/5">
-                <span className="flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  Spam & disposable emails blocked
-                </span>
-                <span>Instant referral links</span>
-              </div>
+              {error && (
+                <div className="mt-4 p-2.5 rounded-lg bg-red-50 border border-red-200/60 text-red-700 text-xs">
+                  {error}
+                </div>
+              )}
             </motion.div>
           ) : (
-            /* STEP 2: Position Card & Live Simulate Referral */
             <motion.div
-              key="position"
-              initial={{ opacity: 0, scale: 0.96 }}
+              key="position-view"
+              initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.25 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.12 }}
               className="space-y-5"
             >
-              {/* Confirmed Ticket Header */}
-              <div className="bg-gradient-to-b from-white/[0.05] to-transparent border border-white/10 rounded-xl p-5 text-center relative overflow-hidden">
-                {spotsJumped !== null && spotsJumped > 0 && (
+              {/* Position Header - Notice prefix="#" handled cleanly without double hash */}
+              <div className="text-center pb-2 border-b border-black/[0.06]">
+                <span className="text-[11px] uppercase tracking-wider text-[#737373] font-medium block mb-1">
+                  Your Current Spot
+                </span>
+                <div className="text-4xl font-semibold text-[#0A0A0A] tracking-tight flex items-center justify-center">
+                  <OdometerNumber value={participant.position} prefix="#" />
+                </div>
+                <p className="text-[12px] text-[#737373] mt-1">
+                  {participant.totalParticipants - participant.position > 0
+                    ? `ahead of ${participant.totalParticipants - participant.position} other ${
+                        participant.totalParticipants - participant.position === 1 ? "person" : "people"
+                      } in line`
+                    : "You are currently in line. Invite friends to jump ahead!"}
+                </p>
+              </div>
+
+              {/* Jump celebration pill */}
+              <AnimatePresence>
+                {spotsJumped && (
                   <motion.div
-                    initial={{ opacity: 0, y: -8 }}
+                    initial={{ opacity: 0, y: -4 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
-                    className="absolute top-3 right-3 text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full"
+                    className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-[12px] font-medium px-3 py-1.5 rounded-lg text-center"
                   >
-                    +{spotsJumped} spots jumped!
+                    Friend joined! You skipped {spotsJumped} spots ahead.
                   </motion.div>
                 )}
+              </AnimatePresence>
 
-                <div className="text-xs uppercase tracking-wider text-zinc-400 font-medium">
-                  Your Current Queue Position
-                </div>
-
-                <div className="my-2.5">
-                  <OdometerNumber
-                    value={participant.position}
-                    prefix="#"
-                    className="text-5xl text-white font-bold drop-shadow-md"
+              {/* Invite Link Box */}
+              <div>
+                <label className="text-[11.5px] text-[#737373] font-medium block mb-1.5">
+                  Share your link to move up in line
+                </label>
+                <div className="flex items-center gap-2 p-1.5 bg-white border border-black/[0.08] shadow-inner rounded-xl">
+                  <input
+                    type="text"
+                    readOnly
+                    value={participant.referralLink}
+                    className="flex-1 bg-transparent px-2 text-[12px] font-mono text-[#0A0A0A] focus:outline-none truncate"
                   />
-                </div>
-
-                <div className="flex items-center justify-center gap-4 text-xs text-zinc-400 pt-2 border-t border-white/5">
-                  <span>
-                    Total in line: <strong className="text-white">{participant.totalParticipants}</strong>
-                  </span>
-                  <span>•</span>
-                  <span>
-                    Invited friends: <strong className="text-emerald-400">{participant.verifiedReferrals}</strong>
-                  </span>
-                </div>
-              </div>
-
-              {/* Milestone Callout */}
-              <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl p-3.5 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-[#FF4F00] flex items-center justify-center text-white shrink-0">
-                  <Gift className="w-4 h-4" />
-                </div>
-                <div className="text-xs leading-snug">
-                  <span className="text-white font-semibold">Next reward: </span>
-                  <span className="text-orange-200">
-                    {participant.nextMilestone?.reward || "Early Access Beta"}
-                  </span>
-                  <p className="text-zinc-400 text-[11px] mt-0.5">
-                    Share your invite link below to move up in line faster.
-                  </p>
-                </div>
-              </div>
-
-              {/* Action Button: Simulate Referral */}
-              <button
-                onClick={handleSimulateReferral}
-                disabled={simulating}
-                className="w-full bg-[#FF4F00] hover:bg-[#FF661A] text-white font-semibold text-sm py-3.5 px-4 rounded-xl transition shadow-lg shadow-orange-500/25 active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-              >
-                <Zap className={`w-4 h-4 ${simulating ? "animate-spin" : ""}`} />
-                <span>{simulating ? "Simulating referral..." : "Simulate Friend Invite (+Skip Ahead)"}</span>
-              </button>
-
-              {/* Referral Link Sharing */}
-              <div className="space-y-2">
-                <div className="text-xs font-medium text-zinc-300 flex items-center justify-between">
-                  <span>Your Personal Referral Link:</span>
-                  <span className="text-[11px] font-mono text-zinc-500">{participant.referralCode}</span>
-                </div>
-                <div className="flex items-center gap-2 bg-[#181820] border border-white/10 rounded-xl p-1.5 pr-2">
-                  <span className="flex-1 text-xs font-mono text-zinc-400 px-2 truncate">
-                    {participant.referralLink}
-                  </span>
                   <button
-                    onClick={copyReferralLink}
-                    className="bg-white/10 hover:bg-white/15 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 shrink-0 cursor-pointer"
+                    onClick={handleCopy}
+                    className="btn-vibrant-white text-[12px] font-medium px-3 py-1 shrink-0 cursor-pointer"
                   >
-                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copied ? <Check className="w-3.5 h-3.5 text-[#14804A]" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{copied ? "Copied" : "Copy"}</span>
                   </button>
-                  <button
-                    onClick={shareToTwitter}
-                    title="Share on X"
-                    className="bg-[#1D9BF0]/15 hover:bg-[#1D9BF0]/25 text-[#1D9BF0] p-1.5 rounded-lg transition shrink-0 cursor-pointer"
-                  >
-                    <Share2 className="w-3.5 h-3.5" />
-                  </button>
                 </div>
               </div>
 
-              {/* Reset link for demo */}
-              <div className="text-center pt-1">
+              {/* Milestone Tracker */}
+              <div className="bg-white/80 border border-black/[0.06] rounded-xl p-3 text-[12px]">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-medium text-[#0A0A0A]">Next milestone</span>
+                  <span className="text-[#737373] tabular-nums font-mono text-[11.5px]">
+                    {participant.verifiedReferrals} / 3 invites
+                  </span>
+                </div>
+                <p className="text-[#737373] text-[11.5px]">
+                  Refer 3 friends to unlock Early Beta Access on launch day.
+                </p>
+              </div>
+
+              {/* Simulation test button - Rich Blue Tactile button */}
+              <div className="space-y-2 pt-1">
                 <button
-                  onClick={() => {
-                    setParticipant(null);
-                    setEmail("");
-                  }}
-                  className="text-xs text-zinc-500 hover:text-zinc-300 transition underline underline-offset-4 cursor-pointer"
+                  type="button"
+                  onClick={handleSimulateReferral}
+                  disabled={simulating}
+                  className="btn-vibrant-primary w-full text-[13.5px] font-medium py-2.5 cursor-pointer disabled:opacity-50"
                 >
-                  Test with a different email
+                  {simulating ? "Simulating referral..." : "Simulate friend signup (+3 spots)"}
                 </button>
+
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    className="text-[12px] text-[#737373] hover:text-[#0A0A0A] transition cursor-pointer"
+                  >
+                    Try another email
+                  </button>
+                </div>
               </div>
             </motion.div>
           )}

@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
-import { Check, Copy, ArrowRight, AlertCircle, ShieldCheck } from "lucide-react";
+import { Check, Copy, AlertCircle } from "lucide-react";
 import confetti from "canvas-confetti";
 import { OdometerNumber } from "@/components/widget/OdometerNumber";
 import { apiRequest } from "@/lib/api";
@@ -40,13 +40,13 @@ function EmbedContent() {
       setParticipant(data);
 
       confetti({
-        particleCount: 60,
-        spread: 70,
+        particleCount: 50,
+        spread: 60,
         origin: { y: 0.65 },
-        colors: ["#FF4F00", "#10B981", "#FFFFFF"],
+        colors: ["#3074FE", "#0A0A0A", "#737373"],
       });
     } catch (err: any) {
-      setError(err.message || "Could not reserve spot. Please verify email.");
+      setError(err.message || "Could not reserve spot. Please verify your email.");
     } finally {
       setLoading(false);
     }
@@ -60,133 +60,91 @@ function EmbedContent() {
   }
 
   return (
-    <div className="w-full max-w-md bg-[#101016] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span>Official Waitlist</span>
-        </div>
-
-        <h2 className="text-2xl font-bold text-white tracking-tight">
-          Reserve Your Priority Spot
+    <div className="w-full max-w-md bg-white border border-black/[0.08] rounded-xl p-7 shadow-[0_2px_12px_rgba(0,0,0,0.06)] space-y-5 text-[#0A0A0A]">
+      <div className="text-center space-y-1">
+        <span className="text-[11px] font-medium text-[#737373] uppercase tracking-wider block">
+          Priority Waitlist
+        </span>
+        <h2 className="text-xl font-semibold tracking-tight text-[#0A0A0A]">
+          Reserve your spot
         </h2>
-        <p className="text-xs text-zinc-400">
-          Invite friends to climb the leaderboard and unlock exclusive pre-launch perks.
+        <p className="text-xs text-[#737373]">
+          Invite friends to skip ahead in line.
         </p>
       </div>
 
       {!participant ? (
-        <form onSubmit={handleJoin} className="space-y-4">
-          <div className="space-y-1">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@company.com"
-              required
-              className="w-full bg-[#181824] border border-white/10 focus:border-[#FF4F00] focus:ring-1 focus:ring-[#FF4F00] rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 outline-none transition"
-            />
-            {error && (
-              <div className="flex items-center gap-1.5 text-xs text-red-400 pt-1">
-                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                <span>{error}</span>
-              </div>
-            )}
-          </div>
+        <form onSubmit={handleJoin} className="space-y-3.5">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="name@company.com"
+            required
+            disabled={loading}
+            className="w-full bg-[#F7F7F8] border border-black/[0.08] focus:border-[#3074FE] focus:bg-white rounded-lg px-3.5 py-2.5 text-sm text-[#0A0A0A] placeholder-[#A1A1A1] outline-none transition"
+          />
+
+          {error && (
+            <div className="p-2.5 text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg flex items-center gap-1.5">
+              <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
 
           <button
             type="submit"
-            disabled={loading}
-            className="w-full bg-[#FF4F00] hover:bg-[#FF661A] text-white font-medium text-sm py-3 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-orange-500/25 active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+            disabled={loading || !email.trim()}
+            className="w-full bg-[#0A0A0A] hover:bg-neutral-800 disabled:opacity-50 text-white font-medium text-xs py-2.5 px-4 rounded-lg transition shadow-sm cursor-pointer"
           >
-            <span>{loading ? "Joining..." : "Join Waitlist"}</span>
-            <ArrowRight className="w-4 h-4" />
+            {loading ? "Securing Spot..." : "Get Priority Spot"}
           </button>
-
-          <div className="text-center text-[11px] text-zinc-500 flex items-center justify-center gap-1 pt-1">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-            <span>Verified anti-fraud protection</span>
-          </div>
         </form>
       ) : (
-        <div className="space-y-5">
-          {/* Live Rank Callout */}
-          <div className="bg-[#161622] border border-white/10 rounded-xl p-5 text-center">
-            <div className="text-xs font-mono uppercase text-zinc-400 tracking-wider">
-              Your Confirmed Position
+        <div className="space-y-5 text-center">
+          <div className="bg-[#F7F7F8] border border-black/[0.06] rounded-xl p-5">
+            <span className="text-[11px] uppercase tracking-wider text-[#737373] block mb-1">
+              Your Position
+            </span>
+            <div className="text-4xl font-semibold text-[#0A0A0A] font-mono tracking-tight flex items-center justify-center gap-1">
+              <span>#</span>
+              <OdometerNumber value={participant.position} />
             </div>
-            <div className="my-2">
-              <OdometerNumber
-                value={participant.position}
-                prefix="#"
-                className="text-5xl text-white font-extrabold"
-              />
-            </div>
-            <div className="text-xs font-mono text-zinc-500">
-              Total in line: <span className="text-zinc-300">{participant.totalParticipants}</span>
-            </div>
+            <p className="text-xs text-[#737373] mt-1.5">
+              ahead of {Math.max(0, participant.totalParticipants - participant.position)} people
+            </p>
           </div>
 
-          {/* Referral Link */}
-          <div className="space-y-1.5">
-            <div className="text-xs font-medium text-zinc-300">Share your invite link to jump ahead:</div>
-            <div className="flex items-center gap-2 bg-[#181824] border border-white/10 rounded-xl p-1.5 pr-2">
-              <span className="flex-1 text-xs font-mono text-zinc-400 px-2 truncate">
-                {participant.referralLink}
-              </span>
+          <div className="text-left space-y-1.5">
+            <label className="text-[11.5px] font-medium text-[#737373] block">
+              Your Referral Link
+            </label>
+            <div className="flex items-center gap-2 p-1.5 bg-[#F7F7F8] border border-black/[0.08] rounded-lg">
+              <input
+                type="text"
+                readOnly
+                value={participant.referralLink}
+                className="flex-1 bg-transparent px-2 text-xs font-mono text-[#0A0A0A] outline-none truncate"
+              />
               <button
                 onClick={copyReferral}
-                className="bg-white/10 hover:bg-white/15 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer"
+                className="bg-white hover:bg-neutral-50 text-[#0A0A0A] border border-black/[0.08] text-xs font-medium px-3 py-1.5 rounded-md transition shrink-0 inline-flex items-center gap-1 cursor-pointer"
               >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copied ? "Copied" : "Copy"}</span>
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied ? "Copied" : "Copy"}
               </button>
             </div>
           </div>
-
-          {/* Social Sharing Buttons */}
-          <div className="grid grid-cols-3 gap-2 text-center text-xs">
-            <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("I just joined the waitlist! Join here:")}&url=${encodeURIComponent(participant.referralLink)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 bg-[#181824] hover:bg-white/10 border border-white/5 rounded-lg text-zinc-300 font-medium transition"
-            >
-              X (Twitter)
-            </a>
-            <a
-              href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Join the waitlist with me: ${participant.referralLink}`)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 bg-[#181824] hover:bg-white/10 border border-white/5 rounded-lg text-zinc-300 font-medium transition"
-            >
-              WhatsApp
-            </a>
-            <a
-              href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(participant.referralLink)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 bg-[#181824] hover:bg-white/10 border border-white/5 rounded-lg text-zinc-300 font-medium transition"
-            >
-              LinkedIn
-            </a>
-          </div>
         </div>
       )}
-
-      {/* Footer Credit */}
-      <div className="text-center pt-2 border-t border-white/5 text-[11px] text-zinc-600">
-        Powered by <a href="/" className="text-zinc-400 hover:underline">QueueJump Engine</a>
-      </div>
     </div>
   );
 }
 
 export default function StandaloneEmbedPage() {
   return (
-    <div className="min-h-screen bg-[#09090B] flex items-center justify-center p-4">
-      <Suspense fallback={<div className="text-xs font-mono text-zinc-500 animate-pulse">Loading waitlist...</div>}>
+    <div className="min-h-screen bg-[#F7F7F8] flex items-center justify-center p-4">
+      <Suspense fallback={<div className="text-xs font-mono text-[#737373]">Loading waitlist widget...</div>}>
         <EmbedContent />
       </Suspense>
     </div>
