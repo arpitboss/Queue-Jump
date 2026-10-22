@@ -14,10 +14,19 @@ import { env } from "./config/env";
 
 export const app = express();
 
-// Security headers
+// Security headers with permissive CSP for Swagger docs and cross-origin embeddable widgets
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com"],
+        connectSrc: ["'self'", "https://unpkg.com", "*"],
+        imgSrc: ["'self'", "data:", "https:"],
+      },
+    },
   })
 );
 

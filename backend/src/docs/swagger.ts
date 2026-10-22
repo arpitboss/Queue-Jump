@@ -123,6 +123,9 @@ swaggerRouter.get("/spec.json", (_req: Request, res: Response) => {
 });
 
 swaggerRouter.get("/", (_req: Request, res: Response) => {
+  // Remove Content-Security-Policy header specifically for Swagger UI
+  res.removeHeader("Content-Security-Policy");
+
   const html = `<!DOCTYPE html>
 <html>
 <head>
@@ -155,5 +158,6 @@ swaggerRouter.get("/", (_req: Request, res: Response) => {
   </script>
 </body>
 </html>`;
+  res.setHeader("Content-Type", "text/html; charset=utf-8");
   res.send(html);
 });
