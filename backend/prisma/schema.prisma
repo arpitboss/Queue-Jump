@@ -1,0 +1,88 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum ParticipantStatus {
+  PENDING
+  VERIFIED
+  FLAGGED
+}
+
+model Tenant {
+  id           String     @id @default(uuid())
+  name         String
+  email        String     @unique
+  passwordHash String
+  createdAt    DateTime   @default(now())
+  campaigns    Campaign[]
+}
+
+model Campaign {
+  id               String        @id @default(uuid())
+  tenantId         String
+  tenant           Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name             String
+  publicKey        String        @unique
+  secretKeyHash    String        @unique
+  referralBonusSec Int           @default(86400)
+  webhookUrl       String?
+  webhookSecret    String?
+  milestonesJson   Json          @default("[]")
+  isDemo           Boolean       @default(false)
+  createdAt        DateTime      @default(now())
+  participants     Participant[]
+  fraudLogs        FraudBlockLog[]
+
+  @@index([tenantId])
+}
+
+model Participant {
+  id                String            @id @default(uuid())
+  campaignId        String
+  campaign          Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  rawEmail          String
+  canonicalEmail    String
+  referralCode      String            @unique
+  referredById      String?
+  referredBy        Participant?      @relation("ReferralTree", fields: [referredById], references: [id])
+  referrals         Participant[]     @relation("ReferralTree")
+  status            ParticipantStatus @default(PENDING)
+  verifiedReferrals Int               @default(0)
+  verificationToken String?           @unique
+  ipAddress         String
+  userAgent         String?
+  joinedAt          DateTime          @default(now())
+  verifiedAt        DateTime?
+
+  @@unique([campaignId, canonicalEmail])
+  @@index([campaignId, referralCode])
+  @@index([referredById])
+}
+
+model FraudBlockLog {
+  id         String   @id @default(uuid())
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  rawEmail   String
+  ipAddress  String
+  reason     String
+  createdAt  DateTime @default(now())
+
+  @@index([campaignId, createdAt])
+}
+
+model WebhookDeliveryLog {
+  id         String   @id @default(uuid())
+  campaignId String
+  eventType  String
+  payload    Json
+  statusCode Int?
+  attempt    Int      @default(1)
+  success    Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
