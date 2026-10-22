@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import { healthRouter } from "./modules/health/health.router";
 import { tenantRouter } from "./modules/tenant/tenant.router";
 import { campaignRouter } from "./modules/campaign/campaign.router";
+import { participantRouter } from "./modules/participant/participant.router";
 import { errorHandler } from "./middlewares/errorHandler";
 import { NotFoundError } from "./utils/errors";
 import { env } from "./config/env";
@@ -18,7 +19,8 @@ app.use(
   })
 );
 
-// CORS configuration
+// CORS configuration:
+// Open CORS for public widget/waitlist endpoints; restricted for dashboard.
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -50,6 +52,7 @@ app.get("/", (_req: Request, res: Response) => {
 app.use("/api/v1/health", healthRouter);
 app.use("/api/v1/tenants", tenantRouter);
 app.use("/api/v1/campaigns", campaignRouter);
+app.use("/api/v1/waitlist", participantRouter);
 
 // 404 catch-all
 app.use((req: Request, _res: Response, next: NextFunction) => {
