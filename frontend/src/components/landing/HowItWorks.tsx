@@ -1,17 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Terminal, Code, Check, Copy } from "lucide-react";
+import { Check, Copy, Code2, Sparkles } from "lucide-react";
 
 export function HowItWorks() {
   const [activeTab, setActiveTab] = useState<"widget" | "rest">("widget");
   const [copied, setCopied] = useState(false);
 
-  const embedCode = `<!-- 1. Drop into any HTML or React/Next.js page -->
+  const embedCode = `<!-- 1. Paste into any Webflow, Framer, WordPress, or HTML site -->
 <div id="queuejump" data-key="pk_live_your_campaign_key"></div>
 <script src="https://queuejump.dev/widget.js" async></script>`;
 
-  const restCode = `// 2. Or hit the headless REST API from your custom UI
+  const restCode = `// 2. Or connect from your custom React / Next.js form
 const response = await fetch("https://api.queuejump.dev/api/v1/waitlist/join", {
   method: "POST",
   headers: {
@@ -20,7 +20,7 @@ const response = await fetch("https://api.queuejump.dev/api/v1/waitlist/join", {
   },
   body: JSON.stringify({
     email: "founder@startup.com",
-    referralCode: "optional-friend-code"
+    referralCode: "friend-code-optional"
   }),
 });
 
@@ -41,47 +41,50 @@ const { position, referralLink } = await response.json();`;
           {/* Left: 3 Steps */}
           <div className="lg:col-span-5 space-y-8">
             <div>
-              <div className="text-xs font-mono uppercase tracking-widest text-orange-400 font-semibold mb-2">
-                Implementation
+              <div className="text-xs font-semibold uppercase tracking-wider text-orange-400 mb-2">
+                Quick Integration
               </div>
-              <h2 className="text-3xl font-bold tracking-tight text-white">
+              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
                 Live on your site in under two minutes
               </h2>
+              <p className="text-sm text-zinc-400 mt-2">
+                No complex backend infrastructure required. Drop it onto your landing page and start collecting referrals instantly.
+              </p>
             </div>
 
             <div className="space-y-6">
               <div className="flex gap-4">
-                <div className="w-8 h-8 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 font-mono text-sm font-bold flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-full bg-orange-500/10 border border-orange-500/20 text-[#FF4F00] text-sm font-bold flex items-center justify-center shrink-0">
                   1
                 </div>
                 <div>
                   <h4 className="text-base font-semibold text-white">Create a Campaign</h4>
                   <p className="text-sm text-zinc-400 mt-0.5">
-                    Configure your referral spot bonus (e.g. 24h jump per invite) and grab your public key.
+                    Set milestone rewards (e.g. 3 invites = VIP access) and copy your public campaign key.
                   </p>
                 </div>
               </div>
 
               <div className="flex gap-4">
-                <div className="w-8 h-8 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 font-mono text-sm font-bold flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-full bg-orange-500/10 border border-orange-500/20 text-[#FF4F00] text-sm font-bold flex items-center justify-center shrink-0">
                   2
                 </div>
                 <div>
-                  <h4 className="text-base font-semibold text-white">Embed Script or Headless API</h4>
+                  <h4 className="text-base font-semibold text-white">Drop in the 2-Line Snippet</h4>
                   <p className="text-sm text-zinc-400 mt-0.5">
-                    Drop our isolated Shadow DOM card onto Webflow, Framer, or Next.js, or hit the REST endpoint.
+                    Paste our isolated widget onto Webflow, Framer, Next.js, or connect directly via REST API.
                   </p>
                 </div>
               </div>
 
               <div className="flex gap-4">
-                <div className="w-8 h-8 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 font-mono text-sm font-bold flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-full bg-orange-500/10 border border-orange-500/20 text-[#FF4F00] text-sm font-bold flex items-center justify-center shrink-0">
                   3
                 </div>
                 <div>
-                  <h4 className="text-base font-semibold text-white">Watch Positions Jump</h4>
+                  <h4 className="text-base font-semibold text-white">Watch Word-of-Mouth Multiply</h4>
                   <p className="text-sm text-zinc-400 mt-0.5">
-                    When signups verify their email, their referrers automatically jump spots in real time.
+                    Subscribers invite colleagues and friends on Twitter, LinkedIn, and group chats to jump the line.
                   </p>
                 </div>
               </div>
@@ -89,13 +92,13 @@ const { position, referralLink } = await response.json();`;
           </div>
 
           {/* Right: Tabbed Code Preview */}
-          <div className="lg:col-span-7 bg-[#101015] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+          <div className="lg:col-span-7 bg-[#111116] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
             {/* Tab Header */}
-            <div className="flex items-center justify-between px-4 py-3 bg-[#15151E] border-b border-white/5">
+            <div className="flex items-center justify-between px-4 py-3 bg-[#16161E] border-b border-white/5">
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setActiveTab("widget")}
-                  className={`text-xs font-mono font-medium px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                  className={`text-xs font-medium px-3 py-1.5 rounded-lg transition cursor-pointer ${
                     activeTab === "widget"
                       ? "bg-white/10 text-white"
                       : "text-zinc-400 hover:text-white"
@@ -105,7 +108,7 @@ const { position, referralLink } = await response.json();`;
                 </button>
                 <button
                   onClick={() => setActiveTab("rest")}
-                  className={`text-xs font-mono font-medium px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                  className={`text-xs font-medium px-3 py-1.5 rounded-lg transition cursor-pointer ${
                     activeTab === "rest"
                       ? "bg-white/10 text-white"
                       : "text-zinc-400 hover:text-white"
@@ -117,7 +120,7 @@ const { position, referralLink } = await response.json();`;
 
               <button
                 onClick={copyCode}
-                className="text-xs font-mono text-zinc-400 hover:text-white transition flex items-center gap-1 cursor-pointer"
+                className="text-xs text-zinc-400 hover:text-white transition flex items-center gap-1.5 cursor-pointer font-mono"
               >
                 {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copied ? "Copied" : "Copy"}</span>

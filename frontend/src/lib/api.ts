@@ -20,14 +20,24 @@ export async function apiRequest<T = any>(endpoint: string, options: RequestOpti
     authHeaders["Authorization"] = `Bearer ${activeToken}`;
   }
 
-  const res = await fetch(`${API_URL}${endpoint}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...authHeaders,
-      ...(headers as Record<string, string>),
-    },
-    ...rest,
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${endpoint}`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...authHeaders,
+        ...(headers as Record<string, string>),
+      },
+      ...rest,
+    });
+  } catch (netErr: any) {
+    const customErr = new Error(
+      "Unable to reach the server. Please verify your connection."
+    );
+    (customErr as any).code = "NETWORK_ERROR";
+    (customErr as any).original = netErr;
+    throw customErr;
+  }
 
   const data = await res.json().catch(() => ({}));
 

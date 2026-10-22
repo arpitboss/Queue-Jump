@@ -226,7 +226,7 @@ export default function DashboardPage() {
             {totalParticipants}
           </div>
           <div className="text-[11px] text-zinc-500 font-mono">
-            Redis ZSET membership
+            Live active subscribers
           </div>
         </div>
 

@@ -5,7 +5,7 @@ import { ArrowRight, Zap } from "lucide-react";
 
 export function CtaSection() {
   return (
-    <section className="py-20 border-t border-white/5 bg-[#09090B] relative overflow-hidden">
+    <section className="py-20 md:py-24 border-t border-white/5 bg-[#09090B] relative overflow-hidden">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-orange-500/10 blur-[140px] pointer-events-none -z-10" />
 
       <div className="max-w-4xl mx-auto px-4 text-center space-y-6">
@@ -18,7 +18,7 @@ export function CtaSection() {
         </h2>
 
         <p className="text-base text-zinc-400 max-w-xl mx-auto">
-          Sign in to the Founder SaaS Control Center to create campaigns, inspect fraud logs, and grab your live API keys.
+          Start turning your pre-launch traffic into a self-sustaining viral loop in under two minutes.
         </p>
 
         <div className="pt-2">

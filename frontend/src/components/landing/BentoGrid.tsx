@@ -1,169 +1,159 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Zap, ShieldCheck, Webhook, Activity, Clock, Terminal, CheckCircle2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { Users, ShieldCheck, Webhook, Zap, Gift, Check, ArrowRight, Sparkles } from "lucide-react";
 
 export function BentoGrid() {
-  const [terminalIndex, setTerminalIndex] = useState(0);
-
-  const logs = [
-    { type: "BLOCKED", email: "bot_99@10minutemail.com", reason: "DISPOSABLE_DOMAIN", time: "12ms ago" },
-    { type: "NORMALIZED", email: "john.doe+promo@googlemail.com", to: "johndoe@gmail.com", time: "34ms ago" },
-    { type: "RATE_LIMITED", ip: "198.51.100.24", reason: "IP_RATE_LIMIT (>5/15m)", time: "110ms ago" },
-    { type: "VERIFIED", email: "alex@hey.com", rank: "#42", jump: "+50 spots", time: "280ms ago" },
-  ];
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTerminalIndex((prev) => (prev + 1) % logs.length);
-    }, 2500);
-    return () => clearInterval(timer);
-  }, [logs.length]);
-
   return (
-    <section id="features" className="py-24 border-t border-white/5 bg-[#09090B]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
-          <div className="text-xs font-mono uppercase tracking-widest text-orange-400 font-semibold">
-            Architectural Engineering
+    <section id="features" className="py-20 md:py-28 border-t border-white/5 bg-[#09090B]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+        {/* Section Header */}
+        <div className="text-center max-w-3xl mx-auto space-y-4">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-orange-500/20 bg-orange-500/10 text-orange-400 text-xs font-semibold uppercase tracking-wider">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Built for High-Growth Launches</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
-            Built for 100K+ concurrent signups, not toy demos
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white">
+            Everything you need for a viral launch
           </h2>
-          <p className="text-sm sm:text-base text-zinc-400">
-            A high-craft developer stack combining Redis Sorted Sets, BullMQ retries, and atomic PostgreSQL transactions.
+          <p className="text-base text-zinc-400">
+            Replicate the iconic viral waitlist loops of Robinhood and Superhuman with zero infrastructure headache.
           </p>
         </div>
 
-        {/* Asymmetric 3-Card Bento Grid */}
+        {/* Bento Grid */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-          {/* Card 1: Redis ZSET Performance (7 cols) */}
-          <div className="md:col-span-7 bg-[#101015] border border-white/10 rounded-2xl p-6 sm:p-8 relative overflow-hidden flex flex-col justify-between">
+          {/* Card 1: Gamified Queue Jumping (7 cols) */}
+          <div className="md:col-span-7 bg-[#111116] border border-white/10 rounded-2xl p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden group hover:border-white/20 transition duration-300">
             <div className="space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400">
-                <Zap className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-[#FF4F00]">
+                <Zap className="w-5 h-5 fill-[#FF4F00]" />
               </div>
-              <h3 className="text-xl font-bold text-white tracking-tight">
-                Sub-10ms Queue Ranking with Redis Sorted Sets
+              <h3 className="text-2xl font-bold text-white tracking-tight">
+                Gamified Line-Jumping That Users Actually Share
               </h3>
               <p className="text-sm text-zinc-400 leading-relaxed">
-                Traditional waitlists crash under launch traffic when calculating positions via SQL <code className="text-orange-400 font-mono">COUNT(*) WHERE created_at &lt; user_created_at</code>. QueueJump maintains rank in logarithmic time.
+                Standard &quot;We&apos;ll be in touch&quot; forms have a 0% viral rate. QueueJump gives subscribers a real queue position and lets them skip 100+ spots for every friend they bring.
               </p>
             </div>
 
-            {/* Benchmark Graphic */}
-            <div className="mt-8 space-y-4 bg-[#14141C] border border-white/5 rounded-xl p-5">
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-xs font-mono">
-                  <span className="text-zinc-400">Standard SQL OFFSET scan (100k rows):</span>
-                  <span className="text-red-400 font-bold">420.5ms</span>
-                </div>
-                <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
-                  <div className="bg-red-500/80 h-full rounded-full w-[95%]" />
-                </div>
+            {/* Visual Milestone Progression */}
+            <div className="mt-8 space-y-3 bg-[#16161E] border border-white/5 rounded-xl p-5">
+              <div className="text-xs font-medium text-zinc-400 flex items-center justify-between pb-1">
+                <span>Subscriber Milestone Ladder:</span>
+                <span className="text-emerald-400 font-semibold">2 of 3 Invites Completed</span>
               </div>
 
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-xs font-mono">
-                  <span className="text-white flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                    QueueJump Redis ZRANK + ZINCRBY:
-                  </span>
-                  <span className="text-emerald-400 font-bold">0.42ms</span>
+              {/* Step 1 */}
+              <div className="flex items-center justify-between p-3 bg-white/[0.03] border border-white/5 rounded-lg text-xs">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                    <Check className="w-3 h-3" />
+                  </div>
+                  <span className="text-zinc-300 font-medium">1 Friend Invited</span>
                 </div>
-                <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
-                  <div className="bg-emerald-400 h-full rounded-full w-[4%]" />
+                <span className="text-emerald-400 font-medium">+50 Spots Jumped</span>
+              </div>
+
+              {/* Step 2 */}
+              <div className="flex items-center justify-between p-3 bg-orange-500/10 border border-orange-500/20 rounded-lg text-xs">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-5 h-5 rounded-full bg-[#FF4F00] text-white flex items-center justify-center shrink-0 font-bold text-[10px]">
+                    2
+                  </div>
+                  <span className="text-white font-semibold">3 Friends Invited</span>
                 </div>
+                <span className="text-orange-400 font-semibold">Priority Beta Access (1 Left!)</span>
+              </div>
+
+              {/* Step 3 */}
+              <div className="flex items-center justify-between p-3 bg-white/[0.02] border border-white/5 rounded-lg text-xs opacity-60">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-5 h-5 rounded-full bg-white/10 text-zinc-400 flex items-center justify-center shrink-0 text-[10px]">
+                    3
+                  </div>
+                  <span className="text-zinc-400">5 Friends Invited</span>
+                </div>
+                <span className="text-zinc-500 font-mono">6 Months Pro Free</span>
               </div>
             </div>
           </div>
 
-          {/* Card 2: 3-Layer Anti-Fraud Shield (5 cols) */}
-          <div className="md:col-span-5 bg-[#101015] border border-white/10 rounded-2xl p-6 sm:p-8 flex flex-col justify-between">
+          {/* Card 2: Smart Bot & Spam Shield (5 cols) */}
+          <div className="md:col-span-5 bg-[#111116] border border-white/10 rounded-2xl p-6 sm:p-8 flex flex-col justify-between group hover:border-white/20 transition duration-300">
             <div className="space-y-3">
               <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
                 <ShieldCheck className="w-5 h-5" />
               </div>
-              <h3 className="text-xl font-bold text-white tracking-tight">
-                Automated Bot & Abuse Shield
+              <h3 className="text-2xl font-bold text-white tracking-tight">
+                Authentic, Spam-Free Waitlists
               </h3>
               <p className="text-sm text-zinc-400 leading-relaxed">
-                Prevents leaderboard rigging via canonical email normalization, disposable domain blocking, and sliding-window IP limits.
+                Referral systems attract spammers and fake emails. Our automated shield filters bad actors in real time so your list stays genuine and investor-ready.
               </p>
             </div>
 
-            {/* Live Terminal Simulation */}
-            <div className="mt-6 bg-[#09090D] border border-white/10 rounded-xl p-4 font-mono text-xs">
-              <div className="flex items-center gap-1.5 pb-3 border-b border-white/5 mb-3">
-                <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
-                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
-                <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
-                <span className="text-[11px] text-zinc-500 ml-2">fraud-audit-stream</span>
+            {/* Clean Feature Pills */}
+            <div className="mt-8 space-y-3">
+              <div className="p-3 bg-[#16161E] border border-white/5 rounded-xl flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+                <div className="text-xs">
+                  <strong className="text-white block font-medium">Disposable Email Blocker</strong>
+                  <span className="text-zinc-400 text-[11px]">Stops 10-minute mail & temporary inboxes</span>
+                </div>
               </div>
 
-              <div className="space-y-2 text-[11px]">
-                {logs.map((log, idx) => (
-                  <div
-                    key={idx}
-                    className={`transition duration-300 ${
-                      idx === terminalIndex ? "text-white opacity-100 font-semibold" : "text-zinc-500 opacity-60"
-                    }`}
-                  >
-                    <span
-                      className={
-                        log.type === "BLOCKED"
-                          ? "text-red-400"
-                          : log.type === "RATE_LIMITED"
-                          ? "text-amber-400"
-                          : log.type === "NORMALIZED"
-                          ? "text-blue-400"
-                          : "text-emerald-400"
-                      }
-                    >
-                      [{log.type}]
-                    </span>{" "}
-                    {log.email || log.ip} &rarr; {log.reason || log.jump || log.to}
-                  </div>
-                ))}
+              <div className="p-3 bg-[#16161E] border border-white/5 rounded-xl flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+                <div className="text-xs">
+                  <strong className="text-white block font-medium">Alias & Dot Normalization</strong>
+                  <span className="text-zinc-400 text-[11px]">Prevents self-referrals with +tag tricks</span>
+                </div>
+              </div>
+
+              <div className="p-3 bg-[#16161E] border border-white/5 rounded-xl flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+                <div className="text-xs">
+                  <strong className="text-white block font-medium">Rate-Limit Protection</strong>
+                  <span className="text-zinc-400 text-[11px]">Blocks automated bot scripts and IP spam</span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Card 3: Event-Driven Webhooks & Rewards (Full 12 cols) */}
-          <div className="md:col-span-12 bg-[#101015] border border-white/10 rounded-2xl p-6 sm:p-8">
+          {/* Card 3: Instant Automations & Webhooks (12 cols) */}
+          <div className="md:col-span-12 bg-[#111116] border border-white/10 rounded-2xl p-6 sm:p-8 group hover:border-white/20 transition duration-300">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               <div className="lg:col-span-5 space-y-3">
                 <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
                   <Webhook className="w-5 h-5" />
                 </div>
-                <h3 className="text-xl font-bold text-white tracking-tight">
-                  Signed HMAC Webhooks & Milestone Rewards
+                <h3 className="text-2xl font-bold text-white tracking-tight">
+                  Automate Rewards with Signed Webhooks
                 </h3>
                 <p className="text-sm text-zinc-400 leading-relaxed">
-                  Automatically notify your backend when participants cross referral milestones (e.g. 3 referrals = Early Access). Every payload is cryptographically signed with HMAC-SHA256 and backed by BullMQ retries.
+                  Trigger automated welcome flows in Resend, Loops, or your backend whenever subscribers reach milestones or climb the top 100 leaderboard.
                 </p>
               </div>
 
-              {/* Interactive Pipeline Diagram */}
-              <div className="lg:col-span-7 bg-[#14141C] border border-white/5 rounded-xl p-5">
+              {/* Workflow Pipeline */}
+              <div className="lg:col-span-7 bg-[#16161E] border border-white/5 rounded-xl p-5">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
-                  <div className="p-3 bg-white/[0.02] border border-white/5 rounded-lg space-y-1">
-                    <div className="text-[11px] font-mono text-zinc-500">TRIGGER</div>
-                    <div className="text-xs font-bold text-white">3 Referrals Verified</div>
-                    <div className="text-[10px] text-emerald-400 font-mono">ACID Confirmed</div>
+                  <div className="p-4 bg-white/[0.02] border border-white/5 rounded-xl space-y-1">
+                    <div className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">1. Trigger</div>
+                    <div className="text-xs font-bold text-white">Friend Joins Link</div>
+                    <div className="text-[11px] text-emerald-400">Email Verified</div>
                   </div>
 
-                  <div className="p-3 bg-white/[0.02] border border-white/5 rounded-lg space-y-1">
-                    <div className="text-[11px] font-mono text-zinc-500">DISPATCHER</div>
-                    <div className="text-xs font-bold text-white">BullMQ Queue</div>
-                    <div className="text-[10px] text-orange-400 font-mono">Auto Retries</div>
+                  <div className="p-4 bg-white/[0.02] border border-white/5 rounded-xl space-y-1">
+                    <div className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">2. Queue Jump</div>
+                    <div className="text-xs font-bold text-white">Ranks Advance</div>
+                    <div className="text-[11px] text-orange-400">+50 Spots Ahead</div>
                   </div>
 
-                  <div className="p-3 bg-white/[0.02] border border-white/5 rounded-lg space-y-1">
-                    <div className="text-[11px] font-mono text-zinc-500">DELIVERY</div>
-                    <div className="text-xs font-bold text-white">Signed Webhook</div>
-                    <div className="text-[10px] text-purple-400 font-mono">HMAC-SHA256</div>
+                  <div className="p-4 bg-white/[0.02] border border-white/5 rounded-xl space-y-1">
+                    <div className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">3. Delivery</div>
+                    <div className="text-xs font-bold text-white">Webhook Sent</div>
+                    <div className="text-[11px] text-purple-400">Invite Code Emailed</div>
                   </div>
                 </div>
               </div>
