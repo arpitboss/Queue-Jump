@@ -93,7 +93,7 @@
           transition: border-color 0.15s, background 0.15s;
         }
         .qj-input:focus {
-          border-color: #3074FE;
+          border-color: ${isLight ? "#0A0A0A" : "#EDEDED"};
           background: ${isLight ? "#FFFFFF" : "#1C1C28"};
         }
         .qj-position-box {
@@ -172,7 +172,7 @@
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          background: rgba(48, 116, 254, 0.12);
+          background: ${isLight ? "rgba(0, 0, 0, 0.04)" : "rgba(255, 255, 255, 0.06)"};
           color: #3074FE;
           font-size: 11px;
           font-weight: 600;
@@ -180,14 +180,14 @@
           letter-spacing: 0.05em;
           padding: 4px 10px;
           border-radius: 9999px;
-          border: 1px solid rgba(48, 116, 254, 0.25);
+          border: 1px solid ${isLight ? "rgba(0, 0, 0, 0.08)" : "rgba(255, 255, 255, 0.12)"};
           margin-bottom: 12px;
         }
         .qj-badge-dot {
           width: 6px;
           height: 6px;
           border-radius: 50%;
-          background: #3074FE;
+          background: #10B981;
           box-shadow: 0 0 8px #3074FE;
         }
         .qj-title {
@@ -228,7 +228,9 @@
         }
         .qj-btn {
           width: 100%;
-          background: ${accentColor};
+          background: ${accentColor !== "#3074FE" ? accentColor : (isLight ? "#0A0A0A" : "#FFFFFF")};
+          color: ${accentColor !== "#3074FE" ? "#FFFFFF" : (isLight ? "#FFFFFF" : "#0A0A0A")};
+          box-shadow: ${isLight ? "0 1px 2px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.06)" : "0 2px 8px rgba(255,255,255,0.1)"};
           color: #FFFFFF;
           font-size: 14px;
           font-weight: 600;

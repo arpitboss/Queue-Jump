@@ -73,7 +73,7 @@ function EmbedContent() {
       <div className="text-center space-y-1">
         <span
           className={`text-[11px] font-semibold uppercase tracking-wider block ${
-            isDark ? "text-[#3074FE]" : "text-[#737373]"
+            isDark ? "text-emerald-400" : "text-[#0A0A0A]"
           }`}
         >
           Priority Waitlist
@@ -110,7 +110,11 @@ function EmbedContent() {
           <button
             type="submit"
             disabled={loading || !email.trim()}
-            className="w-full bg-[#3074FE] hover:bg-[#2365EC] disabled:opacity-50 text-white font-medium text-xs py-2.5 px-4 rounded-lg transition shadow-sm cursor-pointer"
+            className={`w-full font-semibold text-xs py-2.5 px-4 rounded-xl transition shadow-sm cursor-pointer disabled:opacity-50 ${
+    isDark
+      ? "bg-white text-[#0A0A0A] hover:bg-zinc-100 shadow-[0_2px_10px_rgba(255,255,255,0.08)]"
+      : "bg-[#0A0A0A] text-white hover:bg-neutral-800 shadow-[0_2px_8px_rgba(0,0,0,0.15)]"
+  }`}
           >
             {loading ? "Securing Spot..." : "Get Priority Spot →"}
           </button>

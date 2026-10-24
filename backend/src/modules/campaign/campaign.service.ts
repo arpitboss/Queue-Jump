@@ -188,11 +188,30 @@ export class CampaignService {
       },
     });
 
-    let csv = "Rank,Email,Status,Verified Referrals,Referral Code,Joined At,Verified At\n";
+    const nowStr = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+    const totalSubscribers = participants.length;
+    const verifiedCount = participants.filter((p) => p.status === "VERIFIED" || p.status === "ADMITTED").length;
+    const admittedCount = participants.filter((p) => p.status === "ADMITTED").length;
+    const totalReferrals = participants.reduce((acc, p) => acc + (p.verifiedReferrals || 0), 0);
+
+    // Clean, professional Excel-compatible CSV with UTF-8 BOM, metadata header, and ISO formatting
+    let csv = "\uFEFF"; // UTF-8 BOM so Excel opens with proper encoding
+    csv += "# ==============================================================================\n";
+    csv += `# QUEUEJUMP LAUNCH WAITLIST REPORT\n`;
+    csv += `# Campaign: ${campaign.name} (${campaign.publicKey})\n`;
+    csv += `# Exported At: ${nowStr}\n`;
+    csv += `# Metrics: ${totalSubscribers} Total Subscribers | ${verifiedCount} Verified | ${admittedCount} Admitted | ${totalReferrals} Total Referrals\n`;
+    csv += "# ==============================================================================\n";
+    csv += '"Rank","Subscriber Email","Canonical Email","Queue Status","Verified Referrals","Unique Invite Code","Joined Date (UTC)","Verified Date (UTC)"\n';
+
     participants.forEach((p, idx) => {
-      const joined = p.joinedAt ? p.joinedAt.toISOString() : "";
-      const verified = p.verifiedAt ? p.verifiedAt.toISOString() : "";
-      csv += `${idx + 1},"${p.rawEmail}",${p.status},${p.verifiedReferrals},"${p.referralCode}","${joined}","${verified}"\n`;
+      const joined = p.joinedAt ? p.joinedAt.toISOString().replace('T', ' ').slice(0, 19) : "";
+      const verified = p.verifiedAt ? p.verifiedAt.toISOString().replace('T', ' ').slice(0, 19) : "";
+      const safeEmail = (p.rawEmail || "").replace(/"/g, '""');
+      const safeCanonical = (p.canonicalEmail || "").replace(/"/g, '""');
+      const safeCode = (p.referralCode || "").replace(/"/g, '""');
+
+      csv += `${idx + 1},"${safeEmail}","${safeCanonical}",${p.status},${p.verifiedReferrals},"${safeCode}","${joined}","${verified}"\n`;
     });
 
     return {

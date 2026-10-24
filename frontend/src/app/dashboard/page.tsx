@@ -10,6 +10,9 @@ import {
   Download,
   UserCheck,
   ShieldCheck,
+  Eye,
+  EyeOff,
+  Info,
 } from "lucide-react";
 import { apiRequest, API_URL } from "@/lib/api";
 import { Campaign, LeaderboardItem, FraudBlockLogItem } from "@/lib/types";
@@ -24,6 +27,8 @@ export default function DashboardPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<"leaderboard" | "fraud" | "embed">("leaderboard");
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [showPublicKey, setShowPublicKey] = useState(false);
+  const [showCardKey, setShowCardKey] = useState(false);
   const [widgetTheme, setWidgetTheme] = useState<"dark" | "light">("dark");
   const [exporting, setExporting] = useState(false);
   const [admitting, setAdmitting] = useState(false);
@@ -203,9 +208,33 @@ export default function DashboardPage() {
               </span>
             )}
           </div>
-          <p className="text-[12px] text-[#737373] font-mono mt-0.5">
-            Key: {selectedCampaign?.publicKey || "None"}
-          </p>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-[11px] font-semibold text-[#737373] uppercase tracking-wider">Key:</span>
+            <div className="inline-flex items-center gap-1.5 bg-[#F7F7F8] border border-black/[0.08] rounded-lg px-2.5 py-0.5 font-mono text-[11px] text-[#0A0A0A] shadow-xs">
+              <span className="select-all">
+                {showPublicKey
+                  ? selectedCampaign?.publicKey
+                  : (selectedCampaign?.publicKey ? `pk_live_••••••••••••••••${selectedCampaign.publicKey.slice(-6)}` : "None")}
+              </span>
+              <div className="h-3 w-px bg-black/[0.08]" />
+              <button
+                type="button"
+                onClick={() => setShowPublicKey(!showPublicKey)}
+                className="text-[#737373] hover:text-[#0A0A0A] transition cursor-pointer p-0.5"
+                title={showPublicKey ? "Hide Key" : "Reveal Key"}
+              >
+                {showPublicKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+              </button>
+              <button
+                type="button"
+                onClick={() => copyToClipboard(selectedCampaign?.publicKey || "", "header_pk")}
+                className="text-[#737373] hover:text-[#0A0A0A] transition cursor-pointer p-0.5"
+                title="Copy Key"
+              >
+                {copiedKey === "header_pk" ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -462,12 +491,23 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex items-center gap-2 bg-[#F7F7F8] border border-black/[0.08] rounded-lg p-2 font-mono text-xs">
-              <span className="flex-1 text-[#0A0A0A] truncate px-1">
-                {selectedCampaign.publicKey}
+              <span className="flex-1 text-[#0A0A0A] truncate px-1 select-all">
+                {showCardKey
+                  ? selectedCampaign.publicKey
+                  : `pk_live_••••••••••••••••••••${selectedCampaign.publicKey.slice(-6)}`}
               </span>
+              <button
+                type="button"
+                onClick={() => setShowCardKey(!showCardKey)}
+                className="p-1 text-[#737373] hover:text-[#0A0A0A] transition cursor-pointer"
+                title={showCardKey ? "Hide full key" : "Reveal full key"}
+              >
+                {showCardKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+              </button>
               <button
                 onClick={() => copyToClipboard(selectedCampaign.publicKey, "pk")}
                 className="p-1 text-[#737373] hover:text-[#0A0A0A] transition cursor-pointer"
+                title="Copy key"
               >
                 {copiedKey === "pk" ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
@@ -562,46 +602,64 @@ export default function DashboardPage() {
 
           <div className="grid md:grid-cols-3 gap-4 pt-2">
             {/* Guide Card 1: Drop-in Embed */}
-            <div className="bg-[#F7F7F8] border border-black/[0.06] rounded-xl p-4 space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-md bg-[#0A0A0A] text-white text-xs font-bold flex items-center justify-center">1</span>
+            <div className="bg-[#F7F7F8] border border-black/[0.06] rounded-xl p-5 space-y-3 hover:border-black/15 transition shadow-xs">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-white border border-black/[0.08] shadow-xs flex items-center justify-center shrink-0">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#0A0A0A]">
+                    <polyline points="16 18 22 12 16 6" />
+                    <polyline points="8 6 2 12 8 18" />
+                  </svg>
+                </div>
                 <h4 className="text-xs font-bold uppercase tracking-wider text-[#0A0A0A]">Drop-in Widget</h4>
               </div>
               <p className="text-xs text-[#737373] leading-relaxed">
-                Paste the snippet inside your HTML, Webflow, Framer, or WordPress site. Uses Shadow DOM so it will never clash with your website's styles.
+                Paste the 2-line snippet into Webflow, Framer, WordPress, or HTML. Encapsulated in browser Shadow DOM for 100% style isolation.
               </p>
-              <div className="bg-[#18181B] text-zinc-300 p-2.5 rounded-lg text-[11px] font-mono">
-                data-theme="dark|light"<br/>
-                data-accent="#3074FE"
+              <div className="bg-[#18181B] text-zinc-300 p-2.5 rounded-lg text-[11px] font-mono leading-tight">
+                <span className="text-zinc-500">&lt;div</span> data-theme="dark|light"<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;data-accent="#HEX" <span className="text-zinc-500">/&gt;</span>
               </div>
             </div>
 
             {/* Guide Card 2: Headless API */}
-            <div className="bg-[#F7F7F8] border border-black/[0.06] rounded-xl p-4 space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-md bg-[#3074FE] text-white text-xs font-bold flex items-center justify-center">2</span>
+            <div className="bg-[#F7F7F8] border border-black/[0.06] rounded-xl p-5 space-y-3 hover:border-black/15 transition shadow-xs">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-white border border-black/[0.08] shadow-xs flex items-center justify-center shrink-0">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#0A0A0A]">
+                    <rect x="2" y="4" width="20" height="16" rx="4" />
+                    <path d="M7 10l3 2-3 2" />
+                    <line x1="13" y1="14" x2="17" y2="14" />
+                  </svg>
+                </div>
                 <h4 className="text-xs font-bold uppercase tracking-wider text-[#0A0A0A]">Headless REST API</h4>
               </div>
               <p className="text-xs text-[#737373] leading-relaxed">
-                Have a custom Figma design? Call our REST API directly from your React/Next.js/HTML form with your campaign key header.
+                Have a custom Figma design? Submit directly from your React/Next.js/Vue form with your campaign key header.
               </p>
-              <div className="bg-[#18181B] text-zinc-300 p-2.5 rounded-lg text-[11px] font-mono">
-                POST /api/v1/waitlist/join<br/>
-                X-Campaign-Key: pk_live_...
+              <div className="bg-[#18181B] text-zinc-300 p-2.5 rounded-lg text-[11px] font-mono leading-tight">
+                <span className="text-emerald-400 font-semibold">POST</span> /api/v1/waitlist/join<br/>
+                <span className="text-zinc-500">Header:</span> X-Campaign-Key
               </div>
             </div>
 
             {/* Guide Card 3: Webhooks & Automations */}
-            <div className="bg-[#F7F7F8] border border-black/[0.06] rounded-xl p-4 space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-md bg-emerald-600 text-white text-xs font-bold flex items-center justify-center">3</span>
+            <div id="webhook-guide-card" className="bg-[#F7F7F8] border border-black/[0.06] rounded-xl p-5 space-y-3 hover:border-black/15 transition shadow-xs scroll-mt-20">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-white border border-black/[0.08] shadow-xs flex items-center justify-center shrink-0">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#0A0A0A]">
+                    <circle cx="12" cy="5" r="3" />
+                    <circle cx="5" cy="19" r="3" />
+                    <circle cx="19" cy="19" r="3" />
+                    <path d="M5 16l7-8 7 8" />
+                  </svg>
+                </div>
                 <h4 className="text-xs font-bold uppercase tracking-wider text-[#0A0A0A]">Webhooks & Sync</h4>
               </div>
               <p className="text-xs text-[#737373] leading-relaxed">
-                Get real-time signed JSON payloads whenever someone verifies, unlocks a milestone reward, or gets admitted to your beta cohort.
+                Receive real-time signed JSON events to trigger Slack notifications, add users to Beehiiv/Loops, or grant beta access.
               </p>
-              <div className="bg-[#18181B] text-zinc-300 p-2.5 rounded-lg text-[11px] font-mono">
-                Events: participant.verified<br/>
+              <div className="bg-[#18181B] text-zinc-300 p-2.5 rounded-lg text-[11px] font-mono leading-tight">
+                <span className="text-amber-400">Events:</span> participant.verified<br/>
                 milestone.unlocked, admitted
               </div>
             </div>
@@ -644,8 +702,12 @@ export default function DashboardPage() {
                 : "bg-white border-black/[0.08] text-[#0A0A0A]"
             }`}>
               <div className="space-y-1">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-[#3074FE]/10 text-[#3074FE] border border-[#3074FE]/20">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#3074FE] animate-pulse"></span>
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border ${
+    widgetTheme === "dark"
+      ? "bg-white/5 text-zinc-200 border-white/10"
+      : "bg-black/[0.04] text-[#0A0A0A] border-black/[0.06]"
+  }`}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                   Live Waitlist
                 </span>
                 <h4 className="text-lg font-bold tracking-tight">Join {selectedCampaign.name}</h4>
@@ -666,7 +728,11 @@ export default function DashboardPage() {
                 />
                 <button
                   type="button"
-                  className="w-full bg-[#3074FE] text-white font-medium text-xs py-2.5 rounded-lg transition"
+                  className={`w-full font-semibold text-xs py-2.5 rounded-xl transition shadow-xs cursor-pointer ${
+    widgetTheme === "dark"
+      ? "bg-white text-[#0A0A0A] hover:bg-zinc-100 shadow-[0_2px_10px_rgba(255,255,255,0.08)]"
+      : "bg-[#0A0A0A] text-white hover:bg-neutral-800 shadow-[0_2px_8px_rgba(0,0,0,0.15)]"
+  }`}
                 >
                   Get Priority Spot →
                 </button>
@@ -771,24 +837,51 @@ export default function DashboardPage() {
               </div>
 
               <div>
-                <label className="text-[#0A0A0A] font-medium block mb-1">Referral Skip Value (Hours)</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[#0A0A0A] font-medium flex items-center gap-1.5">
+                    <span>Referral Skip Value (Hours)</span>
+                    <span className="relative group cursor-help inline-flex items-center">
+                      <Info className="w-3.5 h-3.5 text-[#737373] hover:text-[#0A0A0A]" />
+                      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 hidden group-hover:block w-64 p-2.5 bg-[#09090B] text-zinc-200 text-[11px] rounded-lg shadow-xl z-50 leading-relaxed font-sans pointer-events-none">
+                        Each verified referral subtracts this number of hours from the user's signup time in Redis, jumping them ahead in line.
+                      </span>
+                    </span>
+                  </label>
+                  <span className="text-[11px] text-[#737373] font-mono">Default: 24h</span>
+                </div>
                 <input
                   type="number"
                   value={newBonusHours}
                   onChange={(e) => setNewBonusHours(Number(e.target.value))}
                   min={1}
-                  className="w-full bg-[#F7F7F8] border border-black/[0.08] focus:border-[#3074FE] focus:bg-white rounded-lg px-3 py-2 text-[#0A0A0A] outline-none"
+                  className="w-full bg-[#F7F7F8] border border-black/[0.08] focus:border-[#0A0A0A] focus:bg-white rounded-lg px-3 py-2 text-[#0A0A0A] outline-none"
                 />
               </div>
 
               <div>
-                <label className="text-[#0A0A0A] font-medium block mb-1">Webhook URL (Optional)</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[#0A0A0A] font-medium">Webhook URL (Optional)</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowCreateModal(false);
+                      setActiveTab("embed");
+                      setTimeout(() => {
+                        const el = document.getElementById("webhook-guide-card");
+                        if (el) el.scrollIntoView({ behavior: "smooth" });
+                      }, 150);
+                    }}
+                    className="text-[11px] text-[#0A0A0A] hover:underline font-medium inline-flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>Know more & specs →</span>
+                  </button>
+                </div>
                 <input
                   type="url"
                   value={newWebhookUrl}
                   onChange={(e) => setNewWebhookUrl(e.target.value)}
                   placeholder="https://api.yourdomain.com/webhooks/queuejump"
-                  className="w-full bg-[#F7F7F8] border border-black/[0.08] focus:border-[#3074FE] focus:bg-white rounded-lg px-3 py-2 text-[#0A0A0A] outline-none"
+                  className="w-full bg-[#F7F7F8] border border-black/[0.08] focus:border-[#0A0A0A] focus:bg-white rounded-lg px-3 py-2 text-[#0A0A0A] outline-none"
                 />
               </div>
 

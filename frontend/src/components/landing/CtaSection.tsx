@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { API_URL } from "@/lib/api";
 
 export function CtaSection() {
   return (
@@ -21,7 +22,7 @@ export function CtaSection() {
             Create a waitlist <ArrowRight className="w-3.5 h-3.5" />
           </Link>
           <a
-            href="http://localhost:4000/api/docs"
+            href={`${API_URL}/api/docs`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-white hover:bg-[#EFEFEF] text-[#0A0A0A] border border-black/[0.08] text-[13px] font-medium px-4 py-2 rounded-full transition"

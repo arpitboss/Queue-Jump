@@ -1,6 +1,7 @@
 "use client";
 
 import { BrandLogo } from "@/components/ui/BrandLogo";
+import { API_URL } from "@/lib/api";
 
 export function Footer() {
   return (
@@ -14,7 +15,7 @@ export function Footer() {
             <a href="https://github.com/arpitboss/Queue-Jump" target="_blank" rel="noopener noreferrer" className="hover:text-[#0A0A0A] transition">
               GitHub
             </a>
-            <a href="https://queuejump-api.onrender.com/api/docs" target="_blank" rel="noopener noreferrer" className="hover:text-[#0A0A0A] transition">
+            <a href={`${API_URL}/api/docs`} target="_blank" rel="noopener noreferrer" className="hover:text-[#0A0A0A] transition">
               Documentation
             </a>
             <a href="/dashboard" className="hover:text-[#0A0A0A] transition">
