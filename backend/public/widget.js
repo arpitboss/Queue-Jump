@@ -38,12 +38,16 @@
       // Check ?ref= parameter in current page URL
       const urlParams = new URLSearchParams(window.location.search);
       const referralCodeParam = urlParams.get("ref");
+      const theme = container.getAttribute("data-theme") || "dark";
+      const isLight = theme === "light";
 
       // Attach Shadow DOM for 100% CSS isolation
       const shadow = container.attachShadow({ mode: "open" });
 
       const style = document.createElement("style");
       style.textContent = `
+        :host { color-scheme: ${isLight ? "light" : "dark"}; }
+
         :host {
           display: block;
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -54,13 +58,111 @@
           box-sizing: border-box;
         }
         .qj-card {
-          background: #0E0E12;
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: ${isLight ? "#FFFFFF" : "#0E0E12"};
+          border: 1px solid ${isLight ? "rgba(0, 0, 0, 0.08)" : "rgba(255, 255, 255, 0.08)"};
           border-radius: 16px;
           padding: 24px;
           max-width: 440px;
           margin: 0 auto;
-          box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+          box-shadow: ${isLight ? "0 12px 32px rgba(0, 0, 0, 0.06)" : "0 20px 40px -15px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1)"};
+          color: ${isLight ? "#0A0A0A" : "#EDEDED"};
+        }
+        .qj-title {
+          font-size: 20px;
+          font-weight: 700;
+          color: ${isLight ? "#0A0A0A" : "#FFFFFF"};
+          margin: 0 0 6px 0;
+          letter-spacing: -0.02em;
+        }
+        .qj-subtitle {
+          font-size: 13px;
+          color: ${isLight ? "#737373" : "#8E8EA0"};
+          margin: 0;
+          line-height: 1.4;
+        }
+        .qj-input {
+          width: 100%;
+          background: ${isLight ? "#F7F7F8" : "#181822"};
+          border: 1px solid ${isLight ? "rgba(0, 0, 0, 0.08)" : "rgba(255, 255, 255, 0.1)"};
+          border-radius: 8px;
+          padding: 12px 14px;
+          font-size: 14px;
+          color: ${isLight ? "#0A0A0A" : "#FFFFFF"};
+          outline: none;
+          transition: border-color 0.15s, background 0.15s;
+        }
+        .qj-input:focus {
+          border-color: #3074FE;
+          background: ${isLight ? "#FFFFFF" : "#1C1C28"};
+        }
+        .qj-position-box {
+          background: ${isLight ? "#F7F7F8" : "#14141B"};
+          border: 1px solid ${isLight ? "rgba(0, 0, 0, 0.06)" : "rgba(255, 255, 255, 0.08)"};
+          border-radius: 12px;
+          padding: 18px;
+          text-align: center;
+          margin-bottom: 16px;
+        }
+        .qj-position-num {
+          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+          font-size: 38px;
+          font-weight: 800;
+          color: ${isLight ? "#0A0A0A" : "#FFFFFF"};
+          letter-spacing: -0.04em;
+          margin: 4px 0;
+        }
+        .qj-position-label {
+          font-size: 12px;
+          color: ${isLight ? "#737373" : "#8E8EA0"};
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+        .qj-stat-val {
+          font-weight: 700;
+          color: ${isLight ? "#0A0A0A" : "#FFFFFF"};
+          font-family: monospace;
+        }
+        .qj-ref-box {
+          background: ${isLight ? "#F7F7F8" : "#16161D"};
+          border: 1px solid ${isLight ? "rgba(0, 0, 0, 0.08)" : "rgba(255, 255, 255, 0.1)"};
+          border-radius: 8px;
+          padding: 8px 12px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+          margin-top: 12px;
+        }
+        .qj-ref-url {
+          font-family: monospace;
+          font-size: 12px;
+          color: ${isLight ? "#52525B" : "#A0A0B0"};
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .qj-copy-btn {
+          background: ${isLight ? "#FFFFFF" : "rgba(255, 255, 255, 0.08)"};
+          border: 1px solid ${isLight ? "rgba(0, 0, 0, 0.1)" : "rgba(255, 255, 255, 0.1)"};
+          color: ${isLight ? "#0A0A0A" : "#EDEDED"};
+          padding: 4px 10px;
+          font-size: 11px;
+          font-weight: 600;
+          border-radius: 6px;
+          cursor: pointer;
+          white-space: nowrap;
+        }
+        .qj-share-btn {
+          background: ${isLight ? "#F4F4F5" : "#181822"};
+          border: 1px solid ${isLight ? "rgba(0, 0, 0, 0.06)" : "rgba(255, 255, 255, 0.08)"};
+          color: ${isLight ? "#52525B" : "#A0A0B2"};
+          font-size: 11px;
+          font-weight: 600;
+          padding: 8px;
+          border-radius: 8px;
+          text-align: center;
+          text-decoration: none;
+          transition: background 0.15s, color 0.15s;
         }
         .qj-header {
           margin-bottom: 20px;

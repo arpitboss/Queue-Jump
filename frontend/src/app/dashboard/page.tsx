@@ -7,6 +7,9 @@ import {
   Check,
   RefreshCw,
   ExternalLink,
+  Download,
+  UserCheck,
+  ShieldCheck,
 } from "lucide-react";
 import { apiRequest, API_URL } from "@/lib/api";
 import { Campaign, LeaderboardItem, FraudBlockLogItem } from "@/lib/types";
@@ -21,6 +24,12 @@ export default function DashboardPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<"leaderboard" | "fraud" | "embed">("leaderboard");
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [widgetTheme, setWidgetTheme] = useState<"dark" | "light">("dark");
+  const [exporting, setExporting] = useState(false);
+  const [admitting, setAdmitting] = useState(false);
+  const [admitCount, setAdmitCount] = useState(10);
+  const [showAdmitModal, setShowAdmitModal] = useState(false);
+  const [admitSuccess, setAdmitSuccess] = useState<string | null>(null);
 
   // New Campaign Modal State
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -81,6 +90,55 @@ export default function DashboardPage() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  
+  async function handleExportCSV() {
+    if (!selectedCampaign) return;
+    setExporting(true);
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("queuejump_token") : null;
+      const res = await fetch(`${API_URL}/api/v1/campaigns/${selectedCampaign.id}/export`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error("Could not generate CSV export.");
+      const blob = await res.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = `waitlist_${selectedCampaign.name.toLowerCase().replace(/[^a-z0-9_-]/g, "_")}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (err: any) {
+      alert(err.message || "Export failed");
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  async function handleAdmitCohortSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!selectedCampaign) return;
+    setAdmitting(true);
+    setAdmitSuccess(null);
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("queuejump_token") : null;
+      const res = await apiRequest<{ admittedCount: number }>(`/api/v1/campaigns/${selectedCampaign.id}/admit`, {
+        method: "POST",
+        token: token || undefined,
+        body: JSON.stringify({ count: admitCount }),
+      });
+      setAdmitSuccess(`Successfully granted access to ${res.admittedCount} participants!`);
+      await loadData();
+      setTimeout(() => setShowAdmitModal(false), 2000);
+    } catch (err: any) {
+      alert(err.message || "Failed to admit cohort");
+    } finally {
+      setAdmitting(false);
+    }
+  }
 
   async function handleCreateCampaign(e: React.FormEvent) {
     e.preventDefault();
@@ -267,6 +325,7 @@ export default function DashboardPage() {
                 <tr>
                   <th className="py-3 px-4">Rank</th>
                   <th className="py-3 px-4">Subscriber</th>
+                  <th className="py-3 px-4">Status</th>
                   <th className="py-3 px-4">Invite Code</th>
                   <th className="py-3 px-4">Verified Referrals</th>
                   <th className="py-3 px-4">Joined At</th>
@@ -286,6 +345,17 @@ export default function DashboardPage() {
                         #{item.rank}
                       </td>
                       <td className="py-3 px-4 text-[#0A0A0A]">{item.email}</td>
+                      <td className="py-3 px-4">
+                        <span className={`px-2 py-0.5 rounded-full text-[10.5px] font-medium font-sans border ${
+                          item.status === "ADMITTED"
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            : item.status === "VERIFIED"
+                            ? "bg-blue-50 text-blue-700 border-blue-200"
+                            : "bg-amber-50 text-amber-700 border-amber-200"
+                        }`}>
+                          {item.status || "VERIFIED"}
+                        </span>
+                      </td>
                       <td className="py-3 px-4">
                         <span className="bg-[#F7F7F8] border border-black/[0.06] px-2 py-0.5 rounded text-[11px] text-[#737373]">
                           {item.referralCode}
@@ -379,17 +449,44 @@ export default function DashboardPage() {
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-[#0A0A0A] block mb-1">
-                HTML Embed Snippet
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-semibold text-[#0A0A0A]">
+                  HTML Embed Snippet
+                </label>
+                <div className="flex items-center gap-1.5 text-xs">
+                  <span className="text-[#737373] text-[11px]">Theme:</span>
+                  <button
+                    type="button"
+                    onClick={() => setWidgetTheme("dark")}
+                    className={`px-2 py-0.5 rounded text-[11px] font-medium transition cursor-pointer ${
+                      widgetTheme === "dark"
+                        ? "bg-[#0A0A0A] text-white"
+                        : "bg-[#F7F7F8] text-[#737373] hover:text-[#0A0A0A]"
+                    }`}
+                  >
+                    Dark
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setWidgetTheme("light")}
+                    className={`px-2 py-0.5 rounded text-[11px] font-medium transition cursor-pointer ${
+                      widgetTheme === "light"
+                        ? "bg-[#0A0A0A] text-white"
+                        : "bg-[#F7F7F8] text-[#737373] hover:text-[#0A0A0A]"
+                    }`}
+                  >
+                    Light
+                  </button>
+                </div>
+              </div>
               <div className="bg-[#18181B] text-zinc-300 p-3 rounded-lg font-mono text-[11.5px] relative">
                 <pre className="overflow-x-auto">
-{`<div id="queuejump" data-key="${selectedCampaign.publicKey}"></div>\n<script src="${API_URL}/widget.js" async></script>`}
+{`<div id="queuejump" data-key="${selectedCampaign.publicKey}" data-theme="${widgetTheme}"></div>\n<script src="${API_URL}/widget.js" async></script>`}
                 </pre>
                 <button
                   onClick={() =>
                     copyToClipboard(
-                      `<div id="queuejump" data-key="${selectedCampaign.publicKey}"></div>\n<script src="${API_URL}/widget.js" async></script>`,
+                      `<div id="queuejump" data-key="${selectedCampaign.publicKey}" data-theme="${widgetTheme}"></div>\n<script src="${API_URL}/widget.js" async></script>`,
                       "embed_code"
                     )
                   }

@@ -5,6 +5,8 @@ import {
   handleGetCampaign,
   handleUpdateCampaign,
   handleDeleteCampaign,
+  handleExportParticipants,
+  handleAdmitCohort,
 } from "./campaign.controller";
 import { tenantAuth } from "../../middlewares/tenantAuth";
 import { fraudService } from "../fraud/fraud.service";
@@ -30,3 +32,5 @@ campaignRouter.get("/:id/fraud-logs", async (req: Request, res: Response, next: 
     next(err);
   }
 });
+campaignRouter.get("/:id/export", handleExportParticipants);
+campaignRouter.post("/:id/admit", handleAdmitCohort);

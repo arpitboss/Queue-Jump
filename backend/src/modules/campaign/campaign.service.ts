@@ -169,6 +169,71 @@ export class CampaignService {
 
     return { success: true };
   }
+
+  async exportParticipants(tenantId: string, campaignId: string) {
+    const campaign = await this.getCampaignById(tenantId, campaignId);
+
+    const participants = await prisma.participant.findMany({
+      where: { campaignId },
+      orderBy: [{ verifiedReferrals: "desc" }, { joinedAt: "asc" }],
+      select: {
+        rawEmail: true,
+        canonicalEmail: true,
+        status: true,
+        verifiedReferrals: true,
+        referralCode: true,
+        joinedAt: true,
+        verifiedAt: true,
+        ipAddress: true,
+      },
+    });
+
+    let csv = "Rank,Email,Status,Verified Referrals,Referral Code,Joined At,Verified At\n";
+    participants.forEach((p, idx) => {
+      const joined = p.joinedAt ? p.joinedAt.toISOString() : "";
+      const verified = p.verifiedAt ? p.verifiedAt.toISOString() : "";
+      csv += `${idx + 1},"${p.rawEmail}",${p.status},${p.verifiedReferrals},"${p.referralCode}","${joined}","${verified}"\n`;
+    });
+
+    return {
+      csv,
+      campaignName: campaign.name.replace(/[^a-zA-Z0-9_-]/g, "_"),
+      totalCount: participants.length,
+    };
+  }
+
+  async admitCohort(tenantId: string, campaignId: string, count: number) {
+    await this.getCampaignById(tenantId, campaignId);
+    const safeCount = Math.max(1, Math.min(count, 500));
+
+    const candidates = await prisma.participant.findMany({
+      where: { campaignId, status: "VERIFIED" },
+      orderBy: [{ verifiedReferrals: "desc" }, { joinedAt: "asc" }],
+      take: safeCount,
+      select: {
+        id: true,
+        rawEmail: true,
+        referralCode: true,
+      },
+    });
+
+    if (candidates.length === 0) {
+      return { admittedCount: 0, participants: [] };
+    }
+
+    const candidateIds = candidates.map((c) => c.id);
+    await prisma.participant.updateMany({
+      where: { id: { in: candidateIds } },
+      data: { status: "ADMITTED" },
+    });
+
+    return {
+      admittedCount: candidates.length,
+      participants: candidates,
+    };
+  }
+
 }
+
 
 export const campaignService = new CampaignService();

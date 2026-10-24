@@ -48,3 +48,26 @@ export async function handleDeleteCampaign(req: Request, res: Response, next: Ne
     next(err);
   }
 }
+export async function handleExportParticipants(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const result = await campaignService.exportParticipants(req.tenant!.id, req.params.id as string);
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="waitlist-${result.campaignName}.csv"`
+    );
+    res.status(200).send(result.csv);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function handleAdmitCohort(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const count = Number(req.body?.count) || 10;
+    const result = await campaignService.admitCohort(req.tenant!.id, req.params.id as string, count);
+    res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
+}

@@ -12,6 +12,8 @@ export interface Campaign {
   webhookUrl?: string | null;
   webhookSecret?: string | null;
   milestones: Milestone[];
+  requireEmailVerification?: boolean;
+  allowedDomains?: string | null;
   isDemo?: boolean;
   createdAt: string;
   _count?: {
@@ -25,7 +27,7 @@ export interface Participant {
   rawEmail: string;
   canonicalEmail?: string;
   referralCode: string;
-  status: "PENDING" | "VERIFIED" | "FLAGGED";
+  status: "PENDING" | "VERIFIED" | "ADMITTED" | "FLAGGED";
   verifiedReferrals: number;
   joinedAt: string;
   verifiedAt?: string | null;
@@ -40,7 +42,7 @@ export interface JoinWaitlistResponse {
   totalParticipants: number;
   verifiedReferrals: number;
   nextMilestone: Milestone | null;
-  status: "PENDING" | "VERIFIED" | "FLAGGED";
+  status: "PENDING" | "VERIFIED" | "ADMITTED" | "FLAGGED";
 }
 
 export interface DemoSimulateResponse {
@@ -59,6 +61,7 @@ export interface LeaderboardItem {
   email: string;
   referralCode: string;
   verifiedReferrals: number;
+  status?: "PENDING" | "VERIFIED" | "ADMITTED" | "FLAGGED";
   joinedAt: string;
 }
 
