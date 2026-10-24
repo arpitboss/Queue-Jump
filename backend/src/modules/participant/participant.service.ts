@@ -425,6 +425,7 @@ export class ParticipantService {
       select: {
         id: true,
         rawEmail: true,
+        referralCode: true,
         verifiedReferrals: true,
         status: true,
         joinedAt: true,
@@ -440,7 +441,9 @@ export class ParticipantService {
         return {
           rank: index + 1,
           participantId: p.id,
+          email: maskEmail(p.rawEmail),
           maskedEmail: maskEmail(p.rawEmail),
+          referralCode: p.referralCode || "N/A",
           verifiedReferrals: p.verifiedReferrals,
           status: p.status,
           joinedAt: p.joinedAt,

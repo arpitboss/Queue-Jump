@@ -40,6 +40,7 @@
       const referralCodeParam = urlParams.get("ref");
       const theme = container.getAttribute("data-theme") || "dark";
       const isLight = theme === "light";
+      const accentColor = container.getAttribute("data-accent") || "#3074FE";
 
       // Attach Shadow DOM for 100% CSS isolation
       const shadow = container.attachShadow({ mode: "open" });
@@ -227,7 +228,7 @@
         }
         .qj-btn {
           width: 100%;
-          background: #3074FE;
+          background: ${accentColor};
           color: #FFFFFF;
           font-size: 14px;
           font-weight: 600;
@@ -242,7 +243,7 @@
           transition: background 0.15s, transform 0.05s;
         }
         .qj-btn:hover {
-          background: #2365EC;
+          filter: brightness(0.92);
         }
         .qj-btn:active {
           transform: translateY(1px);

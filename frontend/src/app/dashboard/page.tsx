@@ -427,7 +427,8 @@ export default function DashboardPage() {
 
       {/* TAB 3: Embed Code & Keys */}
       {activeTab === "embed" && selectedCampaign && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="bg-white border border-black/[0.08] rounded-xl p-5 shadow-sm space-y-4">
             <div>
               <h3 className="text-sm font-semibold text-[#0A0A0A]">Public Campaign Key</h3>
@@ -508,21 +509,81 @@ export default function DashboardPage() {
 
             <div className="bg-[#F7F7F8] border border-black/[0.08] rounded-lg p-2.5 flex items-center justify-between text-xs font-mono">
               <span className="text-[#737373] truncate">
-                /embed/{selectedCampaign.publicKey}
+                /embed/{selectedCampaign.publicKey}?theme={widgetTheme}
               </span>
               <a
-                href={`/embed/${selectedCampaign.publicKey}`}
+                href={`/embed/${selectedCampaign.publicKey}?theme=${widgetTheme}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[#3074FE] hover:underline inline-flex items-center gap-1 font-medium ml-2"
               >
-                <span>Preview</span>
+                <span>Preview ({widgetTheme.toUpperCase()})</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
             </div>
           </div>
         </div>
-      )}
+
+        {/* Live Visual Preview Card */}
+        <div className="bg-white border border-black/[0.08] rounded-xl p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-semibold text-[#0A0A0A]">
+                Live Visual Preview ({widgetTheme.toUpperCase()} THEME)
+              </h3>
+              <p className="text-xs text-[#737373] mt-0.5">
+                Real-time preview of how this widget renders when embedded on an external website.
+              </p>
+            </div>
+            <span className="text-[11px] font-mono px-2.5 py-1 rounded bg-black/[0.05] text-[#737373]">
+              data-theme="{widgetTheme}"
+            </span>
+          </div>
+
+          <div className={`p-8 rounded-xl border flex items-center justify-center transition-colors duration-200 ${
+            widgetTheme === "dark" ? "bg-[#09090B] border-zinc-800" : "bg-[#F4F4F5] border-black/[0.06]"
+          }`}>
+            <div className={`w-full max-w-sm rounded-2xl p-6 shadow-xl space-y-4 border transition-all duration-200 ${
+              widgetTheme === "dark"
+                ? "bg-[#0E0E12] border-white/[0.08] text-white"
+                : "bg-white border-black/[0.08] text-[#0A0A0A]"
+            }`}>
+              <div className="space-y-1">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-[#3074FE]/10 text-[#3074FE] border border-[#3074FE]/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#3074FE] animate-pulse"></span>
+                  Live Waitlist
+                </span>
+                <h4 className="text-lg font-bold tracking-tight">Join {selectedCampaign.name}</h4>
+                <p className={`text-xs ${widgetTheme === "dark" ? "text-zinc-400" : "text-[#737373]"}`}>
+                  Reserve your spot. Skip ahead in line when you invite friends.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <input
+                  type="email"
+                  readOnly
+                  placeholder="name@company.com"
+                  className={`w-full px-3 py-2 rounded-lg text-xs outline-none border ${
+                    widgetTheme === "dark"
+                      ? "bg-[#181822] border-white/10 text-white placeholder-zinc-500"
+                      : "bg-[#F7F7F8] border-black/[0.08] text-[#0A0A0A] placeholder-zinc-400"
+                  }`}
+                />
+                <button
+                  type="button"
+                  className="w-full bg-[#3074FE] text-white font-medium text-xs py-2.5 rounded-lg transition"
+                >
+                  Get Priority Spot →
+                </button>
+              </div>
+              <div className="text-center text-[10.5px] text-zinc-500 pt-1">
+                Powered by QueueJump
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
 
       {/* Modal: Create Campaign */}
       {showCreateModal && (
