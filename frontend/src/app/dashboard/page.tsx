@@ -280,40 +280,64 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Segmented Control Tabs */}
-      <div className="flex bg-[#EFEFEF] p-1 rounded-xl w-max border border-black/[0.04]">
-        <button
-          onClick={() => setActiveTab("leaderboard")}
-          className={`text-xs font-medium px-3.5 py-1.5 rounded-lg transition cursor-pointer ${
-            activeTab === "leaderboard"
-              ? "bg-white text-[#0A0A0A] shadow-sm"
-              : "text-[#737373] hover:text-[#0A0A0A]"
-          }`}
-        >
-          Leaderboard ({totalParticipants})
-        </button>
+      {/* Segmented Control Tabs & Action Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex bg-[#EFEFEF] p-1 rounded-xl w-max border border-black/[0.04]">
+          <button
+            onClick={() => setActiveTab("leaderboard")}
+            className={`text-xs font-medium px-3.5 py-1.5 rounded-lg transition cursor-pointer ${
+              activeTab === "leaderboard"
+                ? "bg-white text-[#0A0A0A] shadow-sm"
+                : "text-[#737373] hover:text-[#0A0A0A]"
+            }`}
+          >
+            Leaderboard ({totalParticipants})
+          </button>
 
-        <button
-          onClick={() => setActiveTab("fraud")}
-          className={`text-xs font-medium px-3.5 py-1.5 rounded-lg transition cursor-pointer ${
-            activeTab === "fraud"
-              ? "bg-white text-[#0A0A0A] shadow-sm"
-              : "text-[#737373] hover:text-[#0A0A0A]"
-          }`}
-        >
-          Fraud Log ({fraudLogs.length})
-        </button>
+          <button
+            onClick={() => setActiveTab("fraud")}
+            className={`text-xs font-medium px-3.5 py-1.5 rounded-lg transition cursor-pointer ${
+              activeTab === "fraud"
+                ? "bg-white text-[#0A0A0A] shadow-sm"
+                : "text-[#737373] hover:text-[#0A0A0A]"
+            }`}
+          >
+            Fraud Log ({fraudLogs.length})
+          </button>
 
-        <button
-          onClick={() => setActiveTab("embed")}
-          className={`text-xs font-medium px-3.5 py-1.5 rounded-lg transition cursor-pointer ${
-            activeTab === "embed"
-              ? "bg-white text-[#0A0A0A] shadow-sm"
-              : "text-[#737373] hover:text-[#0A0A0A]"
-          }`}
-        >
-          Embed Code & Key
-        </button>
+          <button
+            onClick={() => setActiveTab("embed")}
+            className={`text-xs font-medium px-3.5 py-1.5 rounded-lg transition cursor-pointer ${
+              activeTab === "embed"
+                ? "bg-white text-[#0A0A0A] shadow-sm"
+                : "text-[#737373] hover:text-[#0A0A0A]"
+            }`}
+          >
+            Integration & Embed
+          </button>
+        </div>
+
+        {activeTab === "leaderboard" && (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleExportCSV}
+              disabled={exporting}
+              className="btn-vibrant-white text-xs px-3.5 py-1.5 inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              title="Download entire waitlist as CSV"
+            >
+              <Download className="w-3.5 h-3.5 text-[#737373]" />
+              <span>{exporting ? "Generating CSV..." : "Export CSV"}</span>
+            </button>
+            <button
+              onClick={() => setShowAdmitModal(true)}
+              className="btn-vibrant-dark text-xs px-3.5 py-1.5 inline-flex items-center gap-1.5 cursor-pointer"
+              title="Grant beta access to top verified participants"
+            >
+              <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Admit Cohort</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* TAB 1: Leaderboard Table */}
@@ -334,7 +358,7 @@ export default function DashboardPage() {
               <tbody className="divide-y divide-black/[0.04] text-[#0A0A0A] font-mono">
                 {leaderboard.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-10 text-center text-[#737373] font-sans">
+                    <td colSpan={6} className="py-10 text-center text-[#737373] font-sans">
                       No signups yet on this campaign. Test joining from the live demo on the homepage!
                     </td>
                   </tr>
@@ -524,6 +548,77 @@ export default function DashboardPage() {
           </div>
         </div>
 
+
+        {/* Comprehensive Integration & Developer Guide */}
+        <div className="bg-white border border-black/[0.08] rounded-xl p-6 shadow-sm space-y-6">
+          <div>
+            <h3 className="text-base font-semibold text-[#0A0A0A]">
+              Founder & Developer Integration Guide
+            </h3>
+            <p className="text-xs text-[#737373] mt-1">
+              Connect QueueJump to your website using either the 2-line drop-in widget or the direct REST API.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-4 pt-2">
+            {/* Guide Card 1: Drop-in Embed */}
+            <div className="bg-[#F7F7F8] border border-black/[0.06] rounded-xl p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-6 rounded-md bg-[#0A0A0A] text-white text-xs font-bold flex items-center justify-center">1</span>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#0A0A0A]">Drop-in Widget</h4>
+              </div>
+              <p className="text-xs text-[#737373] leading-relaxed">
+                Paste the snippet inside your HTML, Webflow, Framer, or WordPress site. Uses Shadow DOM so it will never clash with your website's styles.
+              </p>
+              <div className="bg-[#18181B] text-zinc-300 p-2.5 rounded-lg text-[11px] font-mono">
+                data-theme="dark|light"<br/>
+                data-accent="#3074FE"
+              </div>
+            </div>
+
+            {/* Guide Card 2: Headless API */}
+            <div className="bg-[#F7F7F8] border border-black/[0.06] rounded-xl p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-6 rounded-md bg-[#3074FE] text-white text-xs font-bold flex items-center justify-center">2</span>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#0A0A0A]">Headless REST API</h4>
+              </div>
+              <p className="text-xs text-[#737373] leading-relaxed">
+                Have a custom Figma design? Call our REST API directly from your React/Next.js/HTML form with your campaign key header.
+              </p>
+              <div className="bg-[#18181B] text-zinc-300 p-2.5 rounded-lg text-[11px] font-mono">
+                POST /api/v1/waitlist/join<br/>
+                X-Campaign-Key: pk_live_...
+              </div>
+            </div>
+
+            {/* Guide Card 3: Webhooks & Automations */}
+            <div className="bg-[#F7F7F8] border border-black/[0.06] rounded-xl p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-6 rounded-md bg-emerald-600 text-white text-xs font-bold flex items-center justify-center">3</span>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#0A0A0A]">Webhooks & Sync</h4>
+              </div>
+              <p className="text-xs text-[#737373] leading-relaxed">
+                Get real-time signed JSON payloads whenever someone verifies, unlocks a milestone reward, or gets admitted to your beta cohort.
+              </p>
+              <div className="bg-[#18181B] text-zinc-300 p-2.5 rounded-lg text-[11px] font-mono">
+                Events: participant.verified<br/>
+                milestone.unlocked, admitted
+              </div>
+            </div>
+          </div>
+
+          {/* Quick API Examples */}
+          <div className="border-t border-black/[0.06] pt-4 space-y-3">
+            <h4 className="text-xs font-semibold text-[#0A0A0A]">Headless API Request Example (cURL)</h4>
+            <div className="bg-[#18181B] text-zinc-300 p-3 rounded-lg font-mono text-[11.5px] overflow-x-auto">
+              curl -X POST ${API_URL}/api/v1/waitlist/join \<br/>
+              &nbsp;&nbsp;-H "Content-Type: application/json" \<br/>
+              &nbsp;&nbsp;-H "X-Campaign-Key: ${selectedCampaign.publicKey}" \<br/>
+              &nbsp;&nbsp;-d '&#123; "email": "founder@startup.com", "referralCode": "optional_ref" &#125;'
+            </div>
+          </div>
+        </div>
+
         {/* Live Visual Preview Card */}
         <div className="bg-white border border-black/[0.08] rounded-xl p-6 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
@@ -584,6 +679,78 @@ export default function DashboardPage() {
         </div>
       </div>
     )}
+
+
+      {/* Admit Cohort Modal */}
+      {showAdmitModal && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white border border-black/[0.08] rounded-2xl max-w-sm w-full p-6 shadow-xl space-y-4">
+            <div>
+              <h3 className="text-base font-semibold text-[#0A0A0A]">
+                Admit Cohort to Beta
+              </h3>
+              <p className="text-xs text-[#737373] mt-1">
+                Grant instant beta access to the top-ranked verified participants on this waitlist.
+              </p>
+            </div>
+
+            <form onSubmit={handleAdmitCohortSubmit} className="space-y-4 text-xs">
+              <div>
+                <label className="text-[#0A0A0A] font-medium block mb-1">
+                  Number of top participants to admit:
+                </label>
+                <div className="grid grid-cols-3 gap-2 mb-2">
+                  {[10, 25, 50].map((num) => (
+                    <button
+                      key={num}
+                      type="button"
+                      onClick={() => setAdmitCount(num)}
+                      className={`py-2 px-3 rounded-lg border text-xs font-medium transition cursor-pointer ${
+                        admitCount === num
+                          ? "bg-[#0A0A0A] text-white border-[#0A0A0A]"
+                          : "bg-[#F7F7F8] border-black/[0.08] text-[#737373] hover:text-[#0A0A0A]"
+                      }`}
+                    >
+                      Top {num}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="number"
+                  value={admitCount}
+                  onChange={(e) => setAdmitCount(Number(e.target.value))}
+                  min={1}
+                  max={500}
+                  className="w-full bg-[#F7F7F8] border border-black/[0.08] focus:border-[#3074FE] focus:bg-white rounded-lg px-3 py-2 text-[#0A0A0A] outline-none"
+                />
+              </div>
+
+              {admitSuccess && (
+                <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium">
+                  {admitSuccess}
+                </div>
+              )}
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-black/[0.06]">
+                <button
+                  type="button"
+                  onClick={() => setShowAdmitModal(false)}
+                  className="btn-vibrant-white px-3.5 py-1.5 text-xs font-medium cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={admitting}
+                  className="btn-vibrant-dark px-4 py-1.5 text-xs font-medium cursor-pointer disabled:opacity-50"
+                >
+                  {admitting ? "Admitting..." : `Grant Access to Top ${admitCount}`}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Modal: Create Campaign */}
       {showCreateModal && (
