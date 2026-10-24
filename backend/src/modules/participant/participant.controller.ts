@@ -11,12 +11,26 @@ export async function handleJoinWaitlist(req: Request, res: Response, next: Next
       "127.0.0.1";
     const userAgent = req.headers["user-agent"];
 
+    let originUrl: string | undefined = validated.originUrl || undefined;
+    if (!originUrl) {
+      if (req.headers.origin) {
+        originUrl = req.headers.origin as string;
+      } else if (req.headers.referer) {
+        try {
+          originUrl = new URL(req.headers.referer as string).origin;
+        } catch {
+          originUrl = undefined;
+        }
+      }
+    }
+
     const result = await participantService.joinWaitlist(
       req.campaign as any,
       validated.email,
       validated.referralCode,
       ipAddress,
-      userAgent
+      userAgent,
+      originUrl
     );
 
     const statusCode = result.isNewSignup ? 201 : 200;

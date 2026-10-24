@@ -16,6 +16,8 @@ export class CampaignService {
         secretKeyHash: keys.secretKeyHash,
         webhookSecret: keys.webhookSecret,
         referralBonusSec: input.referralBonusSec,
+        requireEmailVerification: input.requireEmailVerification ?? false,
+        allowedDomains: input.allowedDomains || null,
         webhookUrl: input.webhookUrl || null,
         milestonesJson: JSON.stringify(input.milestones),
       },
@@ -28,6 +30,8 @@ export class CampaignService {
       secretKey: keys.secretKey, // Returned ONLY upon creation!
       webhookSecret: campaign.webhookSecret,
       referralBonusSec: campaign.referralBonusSec,
+      requireEmailVerification: campaign.requireEmailVerification,
+      allowedDomains: campaign.allowedDomains,
       webhookUrl: campaign.webhookUrl,
       milestones: input.milestones,
       createdAt: campaign.createdAt,
@@ -43,6 +47,8 @@ export class CampaignService {
         name: true,
         publicKey: true,
         referralBonusSec: true,
+        requireEmailVerification: true,
+        allowedDomains: true,
         webhookUrl: true,
         milestonesJson: true,
         isDemo: true,
@@ -58,7 +64,10 @@ export class CampaignService {
 
     return campaigns.map((c) => ({
       ...c,
-      milestones: typeof c.milestonesJson === "string" ? JSON.parse(c.milestonesJson) : c.milestonesJson,
+      milestones:
+        typeof c.milestonesJson === "string"
+          ? JSON.parse(c.milestonesJson)
+          : c.milestonesJson || [],
     }));
   }
 
@@ -80,82 +89,82 @@ export class CampaignService {
     }
 
     if (campaign.tenantId !== tenantId) {
-      throw new ForbiddenError("You do not have access to this campaign", "FORBIDDEN");
+      throw new ForbiddenError("You do not have access to this campaign");
     }
 
     return {
-      ...campaign,
-      secretKeyHash: undefined, // Never leak hash
+      id: campaign.id,
+      name: campaign.name,
+      publicKey: campaign.publicKey,
+      webhookSecret: campaign.webhookSecret,
+      referralBonusSec: campaign.referralBonusSec,
+      requireEmailVerification: campaign.requireEmailVerification,
+      allowedDomains: campaign.allowedDomains,
+      webhookUrl: campaign.webhookUrl,
       milestones:
         typeof campaign.milestonesJson === "string"
           ? JSON.parse(campaign.milestonesJson)
-          : campaign.milestonesJson,
+          : campaign.milestonesJson || [],
+      isDemo: campaign.isDemo,
+      createdAt: campaign.createdAt,
+      stats: {
+        totalParticipants: campaign._count.participants,
+        fraudBlocked: campaign._count.fraudLogs,
+      },
     };
   }
 
   async updateCampaign(tenantId: string, campaignId: string, input: UpdateCampaignInput) {
-    const existing = await prisma.campaign.findUnique({
-      where: { id: campaignId },
-    });
+    await this.getCampaignById(tenantId, campaignId);
 
-    if (!existing) {
-      throw new NotFoundError("Campaign not found", "CAMPAIGN_NOT_FOUND");
-    }
-
-    if (existing.tenantId !== tenantId) {
-      throw new ForbiddenError("You do not have access to this campaign", "FORBIDDEN");
-    }
+    const updateData: any = {};
+    if (input.name !== undefined) updateData.name = input.name;
+    if (input.referralBonusSec !== undefined) updateData.referralBonusSec = input.referralBonusSec;
+    if (input.requireEmailVerification !== undefined) updateData.requireEmailVerification = input.requireEmailVerification;
+    if (input.allowedDomains !== undefined) updateData.allowedDomains = input.allowedDomains;
+    if (input.webhookUrl !== undefined) updateData.webhookUrl = input.webhookUrl;
+    if (input.milestones !== undefined) updateData.milestonesJson = JSON.stringify(input.milestones);
 
     const updated = await prisma.campaign.update({
       where: { id: campaignId },
-      data: {
-        ...(input.name !== undefined ? { name: input.name } : {}),
-        ...(input.referralBonusSec !== undefined ? { referralBonusSec: input.referralBonusSec } : {}),
-        ...(input.webhookUrl !== undefined ? { webhookUrl: input.webhookUrl } : {}),
-        ...(input.milestones !== undefined ? { milestonesJson: JSON.stringify(input.milestones) } : {}),
-      },
+      data: updateData,
     });
 
-    // Invalidate Redis cache for this public key
     try {
-      await redis.del(`campaign:pk:${existing.publicKey}`);
+      await redis.del(`campaign:pk:${updated.publicKey}`);
     } catch {
-      // Ignore Redis del error
+      // Non-critical cache purge error
     }
 
     return {
-      ...updated,
-      secretKeyHash: undefined,
+      id: updated.id,
+      name: updated.name,
+      publicKey: updated.publicKey,
+      referralBonusSec: updated.referralBonusSec,
+      requireEmailVerification: updated.requireEmailVerification,
+      allowedDomains: updated.allowedDomains,
+      webhookUrl: updated.webhookUrl,
       milestones:
         typeof updated.milestonesJson === "string"
           ? JSON.parse(updated.milestonesJson)
-          : updated.milestonesJson,
+          : updated.milestonesJson || [],
     };
   }
 
   async deleteCampaign(tenantId: string, campaignId: string) {
-    const existing = await prisma.campaign.findUnique({
-      where: { id: campaignId },
-    });
+    const campaign = await this.getCampaignById(tenantId, campaignId);
 
-    if (!existing) {
-      throw new NotFoundError("Campaign not found", "CAMPAIGN_NOT_FOUND");
+    if (campaign.isDemo) {
+      throw new ForbiddenError("Cannot delete default demo campaign");
     }
 
-    if (existing.tenantId !== tenantId) {
-      throw new ForbiddenError("You do not have access to this campaign", "FORBIDDEN");
-    }
+    await prisma.campaign.delete({ where: { id: campaignId } });
 
-    await prisma.campaign.delete({
-      where: { id: campaignId },
-    });
-
-    // Cleanup Redis keys
     try {
-      await redis.del(`campaign:pk:${existing.publicKey}`);
-      await redis.del(`campaign:${existing.id}:leaderboard`);
+      await redis.del(`campaign:pk:${campaign.publicKey}`);
+      await redis.del(`leaderboard:${campaignId}`);
     } catch {
-      // Ignore
+      // Non-critical cache cleanup error
     }
 
     return { success: true };

@@ -8,6 +8,8 @@ export const milestoneItemSchema = z.object({
 export const createCampaignSchema = z.object({
   name: z.string().trim().min(2, "Campaign name must be at least 2 characters"),
   referralBonusSec: z.number().int().min(0, "Bonus seconds cannot be negative").default(86400),
+  requireEmailVerification: z.boolean().default(false),
+  allowedDomains: z.string().trim().optional().nullable(),
   webhookUrl: z.string().trim().url("Invalid webhook URL").optional().nullable(),
   milestones: z.array(milestoneItemSchema).default([]),
 });
@@ -15,6 +17,8 @@ export const createCampaignSchema = z.object({
 export const updateCampaignSchema = z.object({
   name: z.string().trim().min(2, "Campaign name must be at least 2 characters").optional(),
   referralBonusSec: z.number().int().min(0).optional(),
+  requireEmailVerification: z.boolean().optional(),
+  allowedDomains: z.string().trim().optional().nullable(),
   webhookUrl: z.string().trim().url("Invalid webhook URL").optional().nullable(),
   milestones: z.array(milestoneItemSchema).optional(),
 });

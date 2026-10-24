@@ -3,10 +3,9 @@ import { prisma } from "../../config/db";
 import { leaderboardService } from "../leaderboard/leaderboard.service";
 import { fraudService } from "../fraud/fraud.service";
 import { generateReferralCode } from "../../utils/referralCode";
-import { NotFoundError, AppError, ForbiddenError, RateLimitError } from "../../utils/errors";
+import { NotFoundError, AppError } from "../../utils/errors";
 import { dispatchWebhook } from "../../jobs/webhookJob";
 import { dispatchEmail } from "../../jobs/emailJob";
-import { checkRateLimit } from "../../middlewares/rateLimiter";
 import { env } from "../../config/env";
 
 export interface CampaignContext {
@@ -14,6 +13,8 @@ export interface CampaignContext {
   name: string;
   publicKey: string;
   referralBonusSec: number;
+  requireEmailVerification?: boolean;
+  allowedDomains?: string | null;
   webhookUrl: string | null;
   webhookSecret: string | null;
   milestonesJson: unknown;
@@ -34,7 +35,8 @@ export class ParticipantService {
     rawEmail: string,
     referrerCode: string | undefined | null,
     ipAddress: string,
-    userAgent?: string
+    userAgent?: string,
+    originUrl?: string
   ) {
     // 1. Resolve referrer if code was supplied
     let referrerId: string | null = null;
@@ -57,6 +59,13 @@ export class ParticipantService {
     });
 
     const { canonicalEmail, localPart } = fraudResult;
+
+    // Helper to format referral link attributing to the host website
+    const formatReferralLink = (code: string) => {
+      const base = originUrl || env.APP_URL;
+      const cleanBase = base.split("?")[0];
+      return `${cleanBase}?ref=${code}`;
+    };
 
     // 3. Check for existing participant (Idempotent response)
     const existing = await prisma.participant.findUnique({
@@ -81,7 +90,7 @@ export class ParticipantService {
         isNewSignup: false,
         participantId: existing.id,
         referralCode: existing.referralCode,
-        referralLink: `${env.APP_URL}?ref=${existing.referralCode}`,
+        referralLink: formatReferralLink(existing.referralCode),
         position: position ?? 1,
         totalParticipants: total,
         verifiedReferrals: existing.verifiedReferrals,
@@ -102,6 +111,8 @@ export class ParticipantService {
 
     const verificationToken = crypto.randomBytes(32).toString("hex");
     const joinedAt = new Date();
+    const requireVerification = campaign.requireEmailVerification ?? false;
+    const initialStatus = requireVerification ? "PENDING" : "VERIFIED";
 
     // 5. Insert participant into PostgreSQL
     const participant = await prisma.participant.create({
@@ -111,11 +122,12 @@ export class ParticipantService {
         canonicalEmail,
         referralCode,
         referredById: referrerId,
-        verificationToken,
+        verificationToken: requireVerification ? verificationToken : null,
         ipAddress,
         userAgent: userAgent || null,
         joinedAt,
-        status: "PENDING",
+        status: initialStatus,
+        verifiedAt: requireVerification ? null : joinedAt,
       },
     });
 
@@ -123,18 +135,73 @@ export class ParticipantService {
     const initialScore = leaderboardService.calculateScore(joinedAt, 0, campaign.referralBonusSec);
     await leaderboardService.addParticipant(campaign.id, participant.id, initialScore);
 
-    // 7. Enqueue double-opt-in verification email
-    await dispatchEmail({
-      to: rawEmail,
-      type: "verification",
-      subject: `Verify your email for ${campaign.name}`,
-      variables: {
-        verifyUrl: `${env.API_URL}/api/v1/waitlist/verify?token=${verificationToken}`,
-        campaignName: campaign.name,
-      },
-    });
+    // 7. Instant Mode: Credit referrer immediately if double opt-in is not required
+    if (!requireVerification && referrerId) {
+      try {
+        const updatedReferrer = await prisma.participant.update({
+          where: { id: referrerId },
+          data: { verifiedReferrals: { increment: 1 } },
+        });
 
-    // 8. Get real-time rank and total
+        // Boost referrer's rank in Redis
+        await leaderboardService.jumpParticipant(
+          campaign.id,
+          referrerId,
+          campaign.referralBonusSec
+        );
+
+        // Check milestones for referrer
+        const milestoneUnlocked = milestones.find((m: any) => m.count === updatedReferrer.verifiedReferrals) || null;
+        if (milestoneUnlocked && campaign.webhookUrl && campaign.webhookSecret) {
+          await dispatchWebhook({
+            campaignId: campaign.id,
+            webhookUrl: campaign.webhookUrl,
+            webhookSecret: campaign.webhookSecret,
+            eventType: "milestone.unlocked",
+            payload: {
+              participantId: updatedReferrer.id,
+              email: maskEmail(updatedReferrer.rawEmail),
+              verifiedReferrals: updatedReferrer.verifiedReferrals,
+              milestone: milestoneUnlocked,
+            },
+          });
+        }
+      } catch (err: any) {
+        console.warn("Could not credit referrer instantly:", err.message);
+      }
+    }
+
+    // 8. If double-opt-in is required, enqueue verification email
+    if (requireVerification) {
+      await dispatchEmail({
+        to: rawEmail,
+        type: "verification",
+        subject: `Verify your spot for ${campaign.name}`,
+        variables: {
+          verifyUrl: `${env.API_URL}/api/v1/waitlist/verify?token=${verificationToken}`,
+          campaignName: campaign.name,
+        },
+      });
+    }
+
+    // 9. Dispatch webhook for new signup if configured
+    if (campaign.webhookUrl && campaign.webhookSecret) {
+      await dispatchWebhook({
+        campaignId: campaign.id,
+        webhookUrl: campaign.webhookUrl,
+        webhookSecret: campaign.webhookSecret,
+        eventType: "participant.verified",
+        payload: {
+          participantId: participant.id,
+          email: maskEmail(participant.rawEmail),
+          referralCode: participant.referralCode,
+          status: participant.status,
+          joinedAt: participant.joinedAt,
+        },
+      });
+    }
+
+    // 10. Get real-time rank and total
     const { position, total } = await leaderboardService.getRankTelemetry(campaign.id, participant.id);
     const nextMilestone = milestones.find((m: any) => m.count > 0) || null;
 
@@ -142,7 +209,7 @@ export class ParticipantService {
       isNewSignup: true,
       participantId: participant.id,
       referralCode: participant.referralCode,
-      referralLink: `${env.APP_URL}?ref=${participant.referralCode}`,
+      referralLink: formatReferralLink(participant.referralCode),
       position: position ?? total,
       totalParticipants: total,
       verifiedReferrals: 0,
@@ -213,7 +280,7 @@ export class ParticipantService {
       };
     });
 
-    // Redis rank jump for referrer (executed outside DB transaction)
+    // Redis rank jump for referrer
     if (result.referrer) {
       await leaderboardService.jumpParticipant(
         result.campaign.id,
@@ -229,8 +296,8 @@ export class ParticipantService {
           webhookSecret: result.campaign.webhookSecret,
           eventType: "milestone.unlocked",
           payload: {
-            referrerId: result.referrer.id,
-            referralCode: result.referrer.referralCode,
+            participantId: result.referrer.id,
+            email: maskEmail(result.referrer.rawEmail),
             verifiedReferrals: result.referrer.verifiedReferrals,
             milestone: result.milestoneUnlocked,
           },
@@ -241,160 +308,88 @@ export class ParticipantService {
           type: "milestone",
           subject: `Reward Unlocked: ${result.milestoneUnlocked.reward}!`,
           variables: {
-            reward: result.milestoneUnlocked.reward,
             campaignName: result.campaign.name,
-          },
-        });
-      }
-
-      // Trigger Webhook for participant verified
-      if (result.campaign.webhookUrl && result.campaign.webhookSecret) {
-        await dispatchWebhook({
-          campaignId: result.campaign.id,
-          webhookUrl: result.campaign.webhookUrl,
-          webhookSecret: result.campaign.webhookSecret,
-          eventType: "participant.verified",
-          payload: {
-            participantId: result.participant.id,
-            canonicalEmail: result.participant.canonicalEmail,
-            referralCode: result.participant.referralCode,
-            referrerId: result.referrer.id,
+            reward: result.milestoneUnlocked.reward,
+            referrals: String(result.referrer.verifiedReferrals),
           },
         });
       }
     }
 
-    const { position, total } = await leaderboardService.getRankTelemetry(
-      result.campaign.id,
-      result.participant.id
-    );
-
     return {
-      success: true,
-      message: "Email successfully verified. Your waitlist position is confirmed!",
-      position: position ?? 1,
-      totalParticipants: total,
+      message: "Email successfully verified. Your waitlist position has been confirmed!",
+      participantId: result.participant.id,
+      campaignId: result.campaign.id,
     };
   }
 
-  async demoSimulateReferral(campaign: CampaignContext, referralCode: string, ipAddress: string) {
-    if (!campaign.isDemo) {
-      throw new ForbiddenError(
-        "Referral simulation is only permitted in the Interactive Demo Playground.",
-        "DEMO_ONLY_ENDPOINT"
-      );
-    }
-
-    // Rate limit simulation to avoid abuse (max 10 per minute per IP)
-    const rateCheck = await checkRateLimit(`demo_sim:${ipAddress}`, 10, 60);
-    if (!rateCheck.allowed) {
-      throw new RateLimitError("Demo simulation rate limit reached. Please wait a minute.");
-    }
-
-    let participant = null;
-
-    if (referralCode && typeof referralCode === "string" && referralCode.trim().length > 0) {
-      participant = await prisma.participant.findUnique({
-        where: { referralCode: referralCode.trim() },
+  async demoSimulateReferral(campaign: CampaignContext, referralCode?: string, ipAddress: string = "127.0.0.1") {
+    let target = null;
+    if (referralCode) {
+      target = await prisma.participant.findUnique({
+        where: { referralCode },
       });
     }
 
-    // If not found by referral code, pick the latest participant in this demo campaign
-    if (!participant) {
-      participant = await prisma.participant.findFirst({
-        where: { campaignId: campaign.id },
-        orderBy: { joinedAt: "desc" },
+    if (!target) {
+      target = await prisma.participant.findFirst({
+        where: { campaignId: campaign.id, status: "VERIFIED" },
+        orderBy: { joinedAt: "asc" },
       });
     }
 
-    // If no participant exists at all in this demo campaign, create a synthetic starter participant
-    if (!participant) {
-      const initialCode = `demo-${Math.random().toString(36).substring(2, 6)}`;
-      participant = await prisma.participant.create({
-        data: {
-          campaignId: campaign.id,
-          rawEmail: `founder_${Date.now()}@queuejump.dev`,
-          canonicalEmail: `founder_${Date.now()}@queuejump.dev`,
-          referralCode: initialCode,
-          status: "VERIFIED",
-          ipAddress,
-        },
-      });
-
-      await leaderboardService.addParticipant(
-        campaign.id,
-        participant.id,
-        leaderboardService.calculateScore(new Date(), 0, campaign.referralBonusSec)
-      );
+    if (!target) {
+      throw new NotFoundError("No participants in campaign to simulate referrals for.");
     }
 
-    const startLatency = performance.now();
+    const simEmail = `simulated_${Math.floor(Math.random() * 89999 + 10000)}@devtest.internal`;
 
-    // 1. Get old position
-    const { position: oldPosition } = await leaderboardService.getRankTelemetry(campaign.id, participant.id);
-
-    // 2. Increment in Postgres
-    const updated = await prisma.participant.update({
-      where: { id: participant.id },
+    await prisma.participant.create({
       data: {
-        verifiedReferrals: { increment: 1 },
+        campaignId: campaign.id,
+        rawEmail: simEmail,
+        canonicalEmail: simEmail,
+        referralCode: generateReferralCode(),
+        referredById: target.id,
+        status: "VERIFIED",
+        verifiedAt: new Date(),
+        ipAddress,
       },
     });
 
-    // 3. Jump score in Redis
-    await leaderboardService.jumpParticipant(campaign.id, participant.id, campaign.referralBonusSec);
+    const updatedTarget = await prisma.participant.update({
+      where: { id: target.id },
+      data: { verifiedReferrals: { increment: 1 } },
+    });
 
-    // 4. Get new position
-    const { position: newPosition, total } = await leaderboardService.getRankTelemetry(campaign.id, participant.id);
+    await leaderboardService.jumpParticipant(
+      campaign.id,
+      target.id,
+      campaign.referralBonusSec
+    );
 
-    const redisLatencyMs = parseFloat((performance.now() - startLatency).toFixed(2));
-    const previous = oldPosition ?? 1;
-    const current = newPosition ?? 1;
-    const spotsJumped = Math.max(0, previous - current);
+    const { position, total } = await leaderboardService.getRankTelemetry(campaign.id, target.id);
 
     return {
-      participantId: participant.id,
-      referralCode: participant.referralCode,
-      previousPosition: previous,
-      newPosition: current,
-      spotsJumped,
-      verifiedReferrals: updated.verifiedReferrals,
+      success: true,
+      simulatedUserEmail: maskEmail(simEmail),
+      beneficiaryId: target.id,
+      newVerifiedReferrals: updatedTarget.verifiedReferrals,
+      newPosition: position,
       totalParticipants: total,
-      redisLatencyMs,
     };
   }
 
   async getStatus(campaign: CampaignContext, referralCode: string) {
     const participant = await prisma.participant.findUnique({
       where: { referralCode },
-      select: {
-        id: true,
-        campaignId: true,
-        rawEmail: true,
-        referralCode: true,
-        status: true,
-        verifiedReferrals: true,
-        joinedAt: true,
-      },
     });
 
     if (!participant || participant.campaignId !== campaign.id) {
-      throw new NotFoundError("Participant referral code not found", "PARTICIPANT_NOT_FOUND");
+      throw new NotFoundError("Participant not found for this campaign", "PARTICIPANT_NOT_FOUND");
     }
 
     const { position, total } = await leaderboardService.getRankTelemetry(campaign.id, participant.id);
-    const potentialJump = await leaderboardService.calculatePotentialJump(
-      campaign.id,
-      participant.id,
-      campaign.referralBonusSec
-    );
-
-    const milestones =
-      typeof campaign.milestonesJson === "string"
-        ? JSON.parse(campaign.milestonesJson)
-        : (campaign.milestonesJson as any[]) || [];
-
-    const nextMilestone = milestones.find((m: any) => m.count > participant.verifiedReferrals) || null;
 
     return {
       participantId: participant.id,
@@ -403,42 +398,51 @@ export class ParticipantService {
       position: position ?? 1,
       totalParticipants: total,
       verifiedReferrals: participant.verifiedReferrals,
-      potentialJump,
-      nextMilestone,
       status: participant.status,
     };
   }
 
-  async getLeaderboard(campaign: CampaignContext, limit = 20) {
-    const top = await leaderboardService.getTopParticipants(campaign.id, limit);
+  async getLeaderboard(campaign: CampaignContext, limit: number = 20) {
+    const topEntries = await leaderboardService.getTopParticipants(campaign.id, limit);
+    let topIds = topEntries.map((e) => e.participantId);
 
-    if (top.length === 0) {
+    if (topIds.length === 0) {
+      const dbFallback = await prisma.participant.findMany({
+        where: { campaignId: campaign.id },
+        orderBy: [{ verifiedReferrals: "desc" }, { joinedAt: "asc" }],
+        take: limit,
+        select: { id: true },
+      });
+      topIds = dbFallback.map((p) => p.id);
+    }
+
+    if (topIds.length === 0) {
       return { leaderboard: [], total: 0 };
     }
 
-    const participantIds = top.map((t) => t.participantId);
-    const records = await prisma.participant.findMany({
-      where: { id: { in: participantIds } },
+    const participants = await prisma.participant.findMany({
+      where: { id: { in: topIds } },
       select: {
         id: true,
         rawEmail: true,
-        referralCode: true,
         verifiedReferrals: true,
+        status: true,
         joinedAt: true,
       },
     });
 
-    const recordMap = new Map(records.map((r) => [r.id, r]));
+    const pMap = new Map(participants.map((p) => [p.id, p]));
 
-    const leaderboard = top
-      .map((entry, index) => {
-        const p = recordMap.get(entry.participantId);
+    const leaderboard = topIds
+      .map((id, index) => {
+        const p = pMap.get(id);
         if (!p) return null;
         return {
           rank: index + 1,
-          email: maskEmail(p.rawEmail),
-          referralCode: p.referralCode,
+          participantId: p.id,
+          maskedEmail: maskEmail(p.rawEmail),
           verifiedReferrals: p.verifiedReferrals,
+          status: p.status,
           joinedAt: p.joinedAt,
         };
       })

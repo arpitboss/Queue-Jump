@@ -8,7 +8,7 @@ import {
   RefreshCw,
   ExternalLink,
 } from "lucide-react";
-import { apiRequest } from "@/lib/api";
+import { apiRequest, API_URL } from "@/lib/api";
 import { Campaign, LeaderboardItem, FraudBlockLogItem } from "@/lib/types";
 
 export default function DashboardPage() {
@@ -34,22 +34,11 @@ export default function DashboardPage() {
   const loadData = useCallback(async () => {
     let token = typeof window !== "undefined" ? localStorage.getItem("queuejump_token") : null;
     if (!token) {
-      try {
-        const loginRes = await apiRequest<{ accessToken: string }>("/api/v1/tenants/login", {
-          method: "POST",
-          body: JSON.stringify({ email: "demo@queuejump.dev", password: "demopassword123" }),
-        });
-        token = loginRes.accessToken;
-        if (typeof window !== "undefined") {
-          localStorage.setItem("queuejump_token", token);
-        }
-      } catch {
-        if (typeof window !== "undefined") {
-          window.location.href = "/login";
-        }
-        setLoading(false);
-        return;
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
       }
+      setLoading(false);
+      return;
     }
 
     try {
@@ -395,12 +384,12 @@ export default function DashboardPage() {
               </label>
               <div className="bg-[#18181B] text-zinc-300 p-3 rounded-lg font-mono text-[11.5px] relative">
                 <pre className="overflow-x-auto">
-{`<div id="queuejump" data-key="${selectedCampaign.publicKey}"></div>\n<script src="http://localhost:4000/widget.js" async></script>`}
+{`<div id="queuejump" data-key="${selectedCampaign.publicKey}"></div>\n<script src="${API_URL}/widget.js" async></script>`}
                 </pre>
                 <button
                   onClick={() =>
                     copyToClipboard(
-                      `<div id="queuejump" data-key="${selectedCampaign.publicKey}"></div>\n<script src="http://localhost:4000/widget.js" async></script>`,
+                      `<div id="queuejump" data-key="${selectedCampaign.publicKey}"></div>\n<script src="${API_URL}/widget.js" async></script>`,
                       "embed_code"
                     )
                   }

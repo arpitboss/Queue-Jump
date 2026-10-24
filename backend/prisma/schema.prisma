@@ -10,6 +10,7 @@ generator client {
 enum ParticipantStatus {
   PENDING
   VERIFIED
+  ADMITTED
   FLAGGED
 }
 
@@ -23,20 +24,22 @@ model Tenant {
 }
 
 model Campaign {
-  id               String        @id @default(uuid())
-  tenantId         String
-  tenant           Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  name             String
-  publicKey        String        @unique
-  secretKeyHash    String        @unique
-  referralBonusSec Int           @default(86400)
-  webhookUrl       String?
-  webhookSecret    String?
-  milestonesJson   Json          @default("[]")
-  isDemo           Boolean       @default(false)
-  createdAt        DateTime      @default(now())
-  participants     Participant[]
-  fraudLogs        FraudBlockLog[]
+  id                       String        @id @default(uuid())
+  tenantId                 String
+  tenant                   Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name                     String
+  publicKey                String        @unique
+  secretKeyHash            String        @unique
+  referralBonusSec         Int           @default(86400)
+  requireEmailVerification Boolean       @default(false)
+  allowedDomains           String?
+  webhookUrl               String?
+  webhookSecret            String?
+  milestonesJson           Json          @default("[]")
+  isDemo                   Boolean       @default(false)
+  createdAt                DateTime      @default(now())
+  participants             Participant[]
+  fraudLogs                FraudBlockLog[]
 
   @@index([tenantId])
 }
