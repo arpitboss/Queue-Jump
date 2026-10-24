@@ -24,6 +24,10 @@ export const webhookQueue = new Queue<WebhookJobData>("webhooks", {
   },
 });
 
+webhookQueue.on("error", (err) => {
+  console.warn("BullMQ webhookQueue warning:", err.message);
+});
+
 export async function dispatchWebhook(data: WebhookJobData) {
   try {
     await webhookQueue.add(`webhook:${data.eventType}:${Date.now()}`, data);

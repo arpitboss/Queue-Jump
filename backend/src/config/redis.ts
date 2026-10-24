@@ -1,27 +1,28 @@
 import Redis from "ioredis";
 import { env } from "./env";
 
+const isTls = env.REDIS_URL.startsWith("rediss://");
+
 export const redis = new Redis(env.REDIS_URL, {
   maxRetriesPerRequest: null,
-  enableReadyCheck: true,
+  enableReadyCheck: false,
   lazyConnect: true,
+  tls: isTls ? { rejectUnauthorized: false } : undefined,
+  retryStrategy(times) {
+    const delay = Math.min(times * 150, 2000);
+    return delay;
+  },
 });
 
 redis.on("error", (err) => {
-  console.error("Redis connection error:", err.message);
+  console.warn("Redis connection warning:", err.message);
 });
 
 export async function pingRedis(): Promise<{ status: "up" | "down"; latencyMs?: number; error?: string }> {
-  const start = Date.now();
   try {
-    if (redis.status !== "ready" && redis.status !== "connecting") {
-      await redis.connect();
-    }
-    const pong = await redis.ping();
-    if (pong === "PONG") {
-      return { status: "up", latencyMs: Date.now() - start };
-    }
-    return { status: "down", error: `Unexpected response: ${pong}` };
+    const start = Date.now();
+    await redis.ping();
+    return { status: "up", latencyMs: Date.now() - start };
   } catch (err: any) {
     return { status: "down", error: err.message };
   }

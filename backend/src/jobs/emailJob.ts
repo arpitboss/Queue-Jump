@@ -10,6 +10,7 @@ export interface EmailJobData {
 }
 
 export const emailQueue = new Queue<EmailJobData>("emails", {
+
   connection: bullmqConnection,
   defaultJobOptions: {
     attempts: 3,
@@ -17,6 +18,10 @@ export const emailQueue = new Queue<EmailJobData>("emails", {
     removeOnComplete: 100,
     removeOnFail: 500,
   },
+});
+
+emailQueue.on("error", (err) => {
+  console.warn("BullMQ emailQueue warning:", err.message);
 });
 
 export async function dispatchEmail(data: EmailJobData) {

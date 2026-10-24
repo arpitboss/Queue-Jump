@@ -79,3 +79,4 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 
 // Central error handler
 app.use(errorHandler);
+export default app;
