@@ -106,9 +106,8 @@ function EmbedContent() {
             <span className="text-[11px] uppercase tracking-wider text-[#737373] block mb-1">
               Your Position
             </span>
-            <div className="text-4xl font-semibold text-[#0A0A0A] font-mono tracking-tight flex items-center justify-center gap-1">
-              <span>#</span>
-              <OdometerNumber value={participant.position} />
+            <div className="text-4xl font-semibold text-[#0A0A0A] font-mono tracking-tight flex items-center justify-center">
+              <OdometerNumber value={participant.position} prefix="#" />
             </div>
             <p className="text-xs text-[#737373] mt-1.5">
               ahead of {Math.max(0, participant.totalParticipants - participant.position)} people
