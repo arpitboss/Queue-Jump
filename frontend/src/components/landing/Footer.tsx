@@ -14,7 +14,7 @@ export function Footer() {
             <a href="https://github.com/arpitboss/Queue-Jump" target="_blank" rel="noopener noreferrer" className="hover:text-[#0A0A0A] transition">
               GitHub
             </a>
-            <a href="http://localhost:4000/api/docs" target="_blank" rel="noopener noreferrer" className="hover:text-[#0A0A0A] transition">
+            <a href="https://queuejump-api.onrender.com/api/docs" target="_blank" rel="noopener noreferrer" className="hover:text-[#0A0A0A] transition">
               Documentation
             </a>
             <a href="/dashboard" className="hover:text-[#0A0A0A] transition">
