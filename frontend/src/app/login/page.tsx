@@ -92,8 +92,8 @@ export default function LoginPage() {
             className="btn-vibrant-white w-full py-2.5 px-3 text-xs font-medium gap-2 cursor-pointer"
           >
             <span className="w-2 h-2 rounded-full bg-[#14804A]" />
-            <span>1-Click Instant Demo Login</span>
-            <span className="text-[#8C8C8C] font-mono">(demo@queuejump.dev)</span>
+            <span>1-Click Instant Demo Access</span>
+            <span className="text-[#8C8C8C] font-mono text-[11px]">(Preloaded with sample waitlist)</span>
           </button>
 
           <div className="relative flex items-center justify-center">

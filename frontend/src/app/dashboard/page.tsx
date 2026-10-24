@@ -601,10 +601,10 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-5 pt-2">
-            {/* FlyingPress-Style Card 1: Drop-in Widget with Mini Interactive Mockup */}
-            <div className="bg-white border border-black/[0.08] rounded-2xl p-5 space-y-4 hover:shadow-md transition duration-200 flex flex-col justify-between">
+            {/* FlyingPress-Style Card 1: Drop-in Widget with Moving Cursor & Button Reaction */}
+            <div className="bg-white border border-black/[0.08] rounded-2xl p-5 space-y-4 hover:shadow-md transition duration-200 flex flex-col justify-between group">
               <div>
-                {/* Visual Tactile Widget Illustration */}
+                {/* Visual Tactile Widget Illustration with Live Motion */}
                 <div className="bg-gradient-to-b from-[#F9F9FB] to-[#F1F1F4] border border-black/[0.06] rounded-xl p-4 shadow-inner mb-4 relative overflow-hidden select-none">
                   <div className="w-full bg-white border border-black/[0.08] rounded-xl p-3 shadow-sm space-y-2 relative">
                     <div className="flex items-center justify-between">
@@ -613,21 +613,27 @@ export default function DashboardPage() {
                         <span className="text-[10px] font-bold text-[#0A0A0A]">Priority Waitlist</span>
                       </div>
                       <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="relative flex h-1.5 w-1.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+                        </span>
                         Active
                       </span>
                     </div>
-                    <div className="bg-[#F7F7F8] border border-black/[0.06] rounded-md px-2 py-1 text-[10px] text-zinc-400">
-                      founder@startup.com
+                    <div className="bg-[#F7F7F8] border border-black/[0.06] rounded-md px-2 py-1 text-[10px] text-zinc-400 flex items-center justify-between">
+                      <span>founder@startup.com</span>
+                      <span className="w-1 h-3 bg-zinc-300 animate-pulse rounded-full" />
                     </div>
-                    <div className="w-full bg-[#0A0A0A] text-white text-[10px] font-semibold py-1.5 rounded-md text-center shadow-xs flex items-center justify-center gap-1">
+                    
+                    {/* Animated Button Reaction */}
+                    <div className="w-full bg-[#0A0A0A] text-white text-[10px] font-semibold py-1.5 rounded-md text-center shadow-xs flex items-center justify-center gap-1 animate-btn-reaction">
                       <span>Get Early Access</span>
                       <span>&rarr;</span>
                     </div>
 
-                    {/* Realistic Floating Cursor */}
-                    <div className="absolute -bottom-2 -right-1 pointer-events-none drop-shadow-md">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#0A0A0A" stroke="#FFFFFF" strokeWidth="1.5">
+                    {/* Realistic Gliding and Clicking Cursor */}
+                    <div className="absolute -bottom-1 -right-0.5 pointer-events-none drop-shadow-lg z-20 animate-cursor-glide">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="#0A0A0A" stroke="#FFFFFF" strokeWidth="1.8">
                         <path d="M3 3l7 18 3-7 7-3L3 3z" />
                       </svg>
                     </div>
@@ -635,13 +641,13 @@ export default function DashboardPage() {
 
                   {/* Feature Check Pills */}
                   <div className="flex flex-wrap items-center justify-center gap-1.5 pt-3">
-                    <span className="text-[9.5px] font-medium bg-white/80 border border-black/[0.06] text-zinc-600 px-2 py-0.5 rounded-full shadow-2xs">
+                    <span className="text-[9.5px] font-medium bg-white/90 border border-black/[0.06] text-zinc-600 px-2 py-0.5 rounded-full shadow-2xs">
                       &#10003; Shadow DOM
                     </span>
-                    <span className="text-[9.5px] font-medium bg-white/80 border border-black/[0.06] text-zinc-600 px-2 py-0.5 rounded-full shadow-2xs">
+                    <span className="text-[9.5px] font-medium bg-white/90 border border-black/[0.06] text-zinc-600 px-2 py-0.5 rounded-full shadow-2xs">
                       &#10003; Zero CSS Bleed
                     </span>
-                    <span className="text-[9.5px] font-medium bg-white/80 border border-black/[0.06] text-zinc-600 px-2 py-0.5 rounded-full shadow-2xs">
+                    <span className="text-[9.5px] font-medium bg-white/90 border border-black/[0.06] text-zinc-600 px-2 py-0.5 rounded-full shadow-2xs">
                       &#10003; Dark / Light
                     </span>
                   </div>
@@ -658,15 +664,15 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* FlyingPress-Style Card 2: Headless API with Tactile Switch Toggles */}
-            <div className="bg-white border border-black/[0.08] rounded-2xl p-5 space-y-4 hover:shadow-md transition duration-200 flex flex-col justify-between">
+            {/* FlyingPress-Style Card 2: Headless API with Animated Switches & Non-technical copy */}
+            <div className="bg-white border border-black/[0.08] rounded-2xl p-5 space-y-4 hover:shadow-md transition duration-200 flex flex-col justify-between group">
               <div>
-                {/* Visual Control Panel with Toggle Switches */}
+                {/* Visual Control Panel with Moving Toggle Switches */}
                 <div className="bg-gradient-to-b from-[#F9F9FB] to-[#F1F1F4] border border-black/[0.06] rounded-xl p-3.5 shadow-inner mb-4 space-y-2 select-none">
                   <div className="bg-white border border-black/[0.08] rounded-lg p-2 flex items-center justify-between shadow-2xs">
-                    <span className="text-[10px] font-medium text-[#0A0A0A]">Redis ZSET Real-Time Ranks</span>
-                    <div className="w-7 h-4 bg-emerald-500 rounded-full relative shadow-inner">
-                      <div className="w-3.5 h-3.5 bg-white rounded-full absolute right-0.5 top-0.5 shadow-xs" />
+                    <span className="text-[10px] font-medium text-[#0A0A0A]">Instant Queue Re-ranking</span>
+                    <div className="w-7 h-4 bg-emerald-500 rounded-full relative shadow-inner overflow-hidden">
+                      <div className="w-3.5 h-3.5 bg-white rounded-full absolute right-0.5 top-0.5 shadow-xs animate-switch-live" />
                     </div>
                   </div>
 
@@ -678,7 +684,7 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="bg-white border border-black/[0.08] rounded-lg p-2 flex items-center justify-between shadow-2xs">
-                    <span className="text-[10px] font-medium text-[#0A0A0A]">Anti-Fraud IP Rate Limit</span>
+                    <span className="text-[10px] font-medium text-[#0A0A0A]">Anti-Fraud Bot Protection</span>
                     <div className="w-7 h-4 bg-emerald-500 rounded-full relative shadow-inner">
                       <div className="w-3.5 h-3.5 bg-white rounded-full absolute right-0.5 top-0.5 shadow-xs" />
                     </div>
@@ -695,22 +701,30 @@ export default function DashboardPage() {
                 <div>
                   <span className="text-emerald-400 font-bold">POST</span> /api/v1/waitlist/join
                 </div>
-                <span className="text-[9.5px] bg-white/10 px-1.5 py-0.5 rounded text-zinc-300">200 OK • 12ms</span>
+                <span className="text-[9.5px] bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  200 OK • 12ms
+                </span>
               </div>
             </div>
 
-            {/* FlyingPress-Style Card 3: Webhooks & Sync with Radial Workflow Hub */}
-            <div id="webhook-guide-card" className="bg-white border border-black/[0.08] rounded-2xl p-5 space-y-4 hover:shadow-md transition duration-200 flex flex-col justify-between scroll-mt-20">
+            {/* FlyingPress-Style Card 3: Webhooks & Sync with Animated Hub & Data Flow */}
+            <div id="webhook-guide-card" className="bg-white border border-black/[0.08] rounded-2xl p-5 space-y-4 hover:shadow-md transition duration-200 flex flex-col justify-between scroll-mt-20 group">
               <div>
-                {/* Visual Radial Hub & Spoke Flow */}
+                {/* Visual Radial Hub with Animated Orbit & Data Streams */}
                 <div className="bg-gradient-to-b from-[#F9F9FB] to-[#F1F1F4] border border-black/[0.06] rounded-xl p-3.5 shadow-inner mb-4 flex items-center justify-center relative overflow-hidden select-none min-h-[110px]">
-                  {/* Center Node */}
-                  <div className="relative z-10 w-11 h-11 rounded-2xl bg-[#0A0A0A] text-white flex items-center justify-center font-bold text-[11px] shadow-md border border-white/20">
+                  {/* Center Node with Breathing Glow */}
+                  <div className="relative z-10 w-11 h-11 rounded-2xl bg-[#0A0A0A] text-white flex items-center justify-center font-bold text-[11px] shadow-md border border-white/20 animate-hub-pulse">
                     QJ
                   </div>
 
+                  {/* Flowing Data Packet Dots */}
+                  <div className="absolute z-10 w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10B981] animate-packet-slack pointer-events-none" />
+                  <div className="absolute z-10 w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10B981] animate-packet-loops pointer-events-none" />
+                  <div className="absolute z-10 w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10B981] animate-packet-db pointer-events-none" />
+
                   {/* Radiating Orbit Ring */}
-                  <div className="absolute w-24 h-24 rounded-full border border-black/[0.08] border-dashed animate-spin-slow pointer-events-none" />
+                  <div className="absolute w-28 h-28 rounded-full border border-black/[0.08] border-dashed animate-spin-slow pointer-events-none" />
 
                   {/* Orbiting Satellite Apps */}
                   <div className="absolute top-2 left-3 bg-white border border-black/[0.08] rounded-md px-1.5 py-0.5 text-[9px] font-semibold text-zinc-700 shadow-2xs">
@@ -737,15 +751,68 @@ export default function DashboardPage() {
           </div>
 
           {/* Quick API Examples */}
-          <div className="border-t border-black/[0.06] pt-4 space-y-3">
+          <div className="border-t border-black/[0.06] pt-5 space-y-3">
             <h4 className="text-xs font-semibold text-[#0A0A0A]">Headless API Request Example (cURL)</h4>
-            <div className="bg-[#18181B] text-zinc-300 p-3.5 rounded-xl font-mono text-[11.5px] overflow-x-auto relative leading-relaxed">
-              <pre className="text-zinc-200">
-{`curl -X POST ${API_URL}/api/v1/waitlist/join \\
-  -H "Content-Type: application/json" \\
-  -H "X-Campaign-Key: ${selectedCampaign.publicKey}" \\
-  -d '{"email": "founder@startup.com", "referralCode": "optional_ref"}'`}
-              </pre>
+            
+            {/* IDE-Grade cURL Code Box */}
+            <div className="bg-[#121215] border border-white/[0.09] rounded-xl overflow-hidden shadow-md">
+              <div className="flex items-center justify-between px-3.5 py-2.5 bg-[#18181D] border-b border-white/[0.06]">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#EF4444]/40 border border-[#EF4444]/60" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#F59E0B]/40 border border-[#F59E0B]/60" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#10B981]/40 border border-[#10B981]/60" />
+                  </div>
+                  <span className="text-[11.5px] font-mono text-zinc-400 font-medium">join_waitlist.sh</span>
+                  <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded font-mono">cURL</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    copyToClipboard(
+                      `curl -X POST ${API_URL}/api/v1/waitlist/join \\\n  -H "Content-Type: application/json" \\\n  -H "X-Campaign-Key: ${selectedCampaign.publicKey}" \\\n  -d '{"email": "founder@startup.com", "referralCode": "optional_ref"}'`,
+                      "curl_code"
+                    )
+                  }
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[11.5px] font-medium transition cursor-pointer border border-white/10 shadow-xs active:scale-95"
+                >
+                  {copiedKey === "curl_code" ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      <span className="text-emerald-400 font-semibold">Copied cURL!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5 text-zinc-300" />
+                      <span>Copy cURL</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div className="p-4 font-mono text-[12px] leading-relaxed overflow-x-auto text-zinc-200 flex gap-3 select-text">
+                <div className="select-none text-zinc-600 text-right pr-2 border-r border-white/[0.08] font-mono shrink-0">
+                  <div>1</div>
+                  <div>2</div>
+                  <div>3</div>
+                  <div>4</div>
+                </div>
+                <div className="overflow-x-auto whitespace-pre font-mono">
+                  <div>
+                    <span className="text-amber-400 font-semibold">curl</span> <span className="text-zinc-400">-X</span> <span className="text-emerald-400 font-semibold">POST</span> <span className="text-sky-300">${API_URL}/api/v1/waitlist/join</span> <span className="text-zinc-500">\</span>
+                  </div>
+                  <div>
+                    {"  "}<span className="text-zinc-400">-H</span> <span className="text-emerald-300">"Content-Type: application/json"</span> <span className="text-zinc-500">\</span>
+                  </div>
+                  <div>
+                    {"  "}<span className="text-zinc-400">-H</span> <span className="text-emerald-300">"X-Campaign-Key: ${selectedCampaign.publicKey}"</span> <span className="text-zinc-500">\</span>
+                  </div>
+                  <div>
+                    {"  "}<span className="text-zinc-400">-d</span> <span className="text-amber-200">{"'{\"email\": \"founder@startup.com\", \"referralCode\": \"optional_ref\"}'"}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -916,7 +983,7 @@ export default function DashboardPage() {
                     <span className="relative group cursor-help inline-flex items-center">
                       <Info className="w-3.5 h-3.5 text-[#737373] hover:text-[#0A0A0A]" />
                       <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 hidden group-hover:block w-64 p-2.5 bg-[#09090B] text-zinc-200 text-[11px] rounded-lg shadow-xl z-50 leading-relaxed font-sans pointer-events-none">
-                        Each verified referral subtracts this number of hours from the user's signup time in Redis, jumping them ahead in line.
+                        Each verified referral subtracts this number of hours from the user's signup time, moving them ahead in line.
                       </span>
                     </span>
                   </label>

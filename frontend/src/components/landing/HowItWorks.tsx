@@ -84,32 +84,63 @@ const { position, referralLink } = await res.json();`;
             </div>
           </div>
 
-          {/* Right: tabbed code block */}
-          <div className="lg:col-span-7 bg-[#18181B] text-zinc-200 border border-black/[0.1] rounded-xl overflow-hidden shadow-sm">
-            <div className="flex items-center justify-between px-4 py-2 bg-[#27272A] border-b border-white/[0.06]">
-              <div className="flex gap-1">
-                {(["widget", "api"] as const).map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`text-xs font-medium px-3 py-1 rounded-md transition cursor-pointer ${
-                      activeTab === tab ? "bg-white/[0.12] text-white" : "text-zinc-400 hover:text-zinc-200"
-                    }`}
-                  >
-                    {tab === "widget" ? "HTML Embed" : "REST API"}
-                  </button>
-                ))}
+          {/* Right: tabbed IDE code block matching user reference */}
+          <div className="lg:col-span-7 bg-[#121215] text-zinc-200 border border-white/[0.09] rounded-2xl overflow-hidden shadow-xl">
+            {/* Top Editor Bar */}
+            <div className="flex items-center justify-between px-4 py-2.5 bg-[#18181D] border-b border-white/[0.06]">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#EF4444]/40 border border-[#EF4444]/60" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#F59E0B]/40 border border-[#F59E0B]/60" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#10B981]/40 border border-[#10B981]/60" />
+                </div>
+                <div className="flex gap-1 bg-black/25 p-0.5 rounded-lg border border-white/[0.06]">
+                  {(["widget", "api"] as const).map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`text-[11.5px] font-mono px-2.5 py-1 rounded-md transition cursor-pointer ${
+                        activeTab === tab
+                          ? "bg-white/[0.12] text-white shadow-xs font-semibold"
+                          : "text-zinc-400 hover:text-zinc-200"
+                      }`}
+                    >
+                      {tab === "widget" ? "embed.html" : "fetch_api.js"}
+                    </button>
+                  ))}
+                </div>
               </div>
+
+              {/* Clearly visible, tactile Copy Button */}
               <button
+                type="button"
                 onClick={handleCopy}
-                className="text-xs text-zinc-400 hover:text-white transition flex items-center gap-1 cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[11.5px] font-medium transition cursor-pointer border border-white/10 shadow-xs active:scale-95"
               >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                {copied ? "Copied" : "Copy"}
+                {copied ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-emerald-400 font-semibold">Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5 text-zinc-300" />
+                    <span>Copy Code</span>
+                  </>
+                )}
               </button>
             </div>
-            <div className="p-4 font-mono text-xs text-zinc-300 leading-relaxed overflow-x-auto">
-              <pre>{code}</pre>
+
+            {/* Code Body with Line Numbers */}
+            <div className="p-4 font-mono text-[12px] text-zinc-300 leading-relaxed overflow-x-auto flex gap-3.5 select-text">
+              <div className="select-none text-zinc-600 text-right pr-2.5 border-r border-white/[0.08] font-mono shrink-0">
+                {code.split('\n').map((_, i) => (
+                  <div key={i}>{i + 1}</div>
+                ))}
+              </div>
+              <div className="overflow-x-auto whitespace-pre font-mono text-zinc-200">
+                <pre>{code}</pre>
+              </div>
             </div>
           </div>
         </div>

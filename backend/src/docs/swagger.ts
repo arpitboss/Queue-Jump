@@ -10,7 +10,7 @@ export function getOpenApiSpec(hostUrl: string) {
       title: "QueueJump REST API",
       version: "1.2.0",
       description:
-        "Production-grade, high-concurrency viral waitlist and referral engine with sub-millisecond Redis ZSET rank calculations, anti-fraud shields, and automated cohort rollouts.",
+        "Production-grade, high-concurrency viral waitlist and referral engine with sub-millisecond sub-millisecond live queue rank calculations, anti-fraud shields, and automated cohort rollouts.",
       contact: {
         name: "QueueJump Product & Web App",
         url: env.APP_URL,
@@ -29,14 +29,14 @@ export function getOpenApiSpec(hostUrl: string) {
       { name: "Campaign Management", description: "Tenant-authenticated campaign configuration and analytics" },
       { name: "Cohort Management", description: "Staged beta rollouts and participant exports" },
       { name: "Tenant Authentication", description: "Founder registration and JWT session management" },
-      { name: "System Telemetry", description: "Database and Redis health status" },
+      { name: "System Telemetry", description: "Database and queue engine health status" },
     ],
     paths: {
       "/api/v1/health": {
         get: {
           tags: ["System Telemetry"],
-          summary: "System Health & Redis Latency Telemetry",
-          description: "Returns connection status and latency for PostgreSQL and Redis.",
+          summary: "System Health & Telemetry",
+          description: "Returns connection status and telemetry for primary database and caching engine.",
           responses: {
             200: { description: "All systems operational" },
             503: { description: "Degraded status" },
@@ -77,7 +77,7 @@ export function getOpenApiSpec(hostUrl: string) {
                 schema: {
                   type: "object",
                   properties: {
-                    email: { type: "string", format: "email", example: "demo@queuejump.dev" },
+                    email: { type: "string", format: "email", example: "founder@startup.com" },
                     password: { type: "string", example: "demopassword123" },
                   },
                   required: ["email", "password"],
