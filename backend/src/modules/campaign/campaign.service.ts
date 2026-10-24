@@ -1,3 +1,4 @@
+import ExcelJS from "exceljs";
 import { prisma } from "../../config/db";
 import { redis } from "../../config/redis";
 import { generateCampaignKeys } from "../../utils/keyGenerator";
@@ -184,40 +185,147 @@ export class CampaignService {
         referralCode: true,
         joinedAt: true,
         verifiedAt: true,
-        ipAddress: true,
       },
     });
 
-    const nowStr = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
-    const totalSubscribers = participants.length;
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = "QueueJump Viral Engine";
+    workbook.created = new Date();
+
+    const worksheet = workbook.addWorksheet("Waitlist Participants", {
+      views: [{ showGridLines: true }],
+    });
+
+    // 1. Title Banner (Rows 1-2)
+    worksheet.mergeCells("A1:H1");
+    const titleCell = worksheet.getCell("A1");
+    titleCell.value = `QUEUEJUMP WAITLIST REPORT — ${campaign.name.toUpperCase()}`;
+    titleCell.font = { name: "Arial", size: 13, bold: true, color: { argb: "FFFFFFFF" } };
+    titleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF09090B" } };
+    titleCell.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
+    worksheet.getRow(1).height = 34;
+
+    const totalCount = participants.length;
     const verifiedCount = participants.filter((p) => p.status === "VERIFIED" || p.status === "ADMITTED").length;
     const admittedCount = participants.filter((p) => p.status === "ADMITTED").length;
     const totalReferrals = participants.reduce((acc, p) => acc + (p.verifiedReferrals || 0), 0);
 
-    // Clean, professional Excel-compatible CSV with UTF-8 BOM, metadata header, and ISO formatting
-    let csv = "\uFEFF"; // UTF-8 BOM so Excel opens with proper encoding
-    csv += "# ==============================================================================\n";
-    csv += `# QUEUEJUMP LAUNCH WAITLIST REPORT\n`;
-    csv += `# Campaign: ${campaign.name} (${campaign.publicKey})\n`;
-    csv += `# Exported At: ${nowStr}\n`;
-    csv += `# Metrics: ${totalSubscribers} Total Subscribers | ${verifiedCount} Verified | ${admittedCount} Admitted | ${totalReferrals} Total Referrals\n`;
-    csv += "# ==============================================================================\n";
-    csv += '"Rank","Subscriber Email","Canonical Email","Queue Status","Verified Referrals","Unique Invite Code","Joined Date (UTC)","Verified Date (UTC)"\n';
+    worksheet.mergeCells("A2:H2");
+    const metaCell = worksheet.getCell("A2");
+    metaCell.value = `Exported: ${new Date().toISOString().replace("T", " ").slice(0, 19)} UTC  |  Key: ${campaign.publicKey}  |  Subscribers: ${totalCount}  |  Verified: ${verifiedCount}  |  Admitted: ${admittedCount}  |  Total Referrals: ${totalReferrals}`;
+    metaCell.font = { name: "Arial", size: 9.5, italic: true, color: { argb: "FF52525B" } };
+    metaCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF4F4F5" } };
+    metaCell.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
+    worksheet.getRow(2).height = 22;
 
-    participants.forEach((p, idx) => {
-      const joined = p.joinedAt ? p.joinedAt.toISOString().replace('T', ' ').slice(0, 19) : "";
-      const verified = p.verifiedAt ? p.verifiedAt.toISOString().replace('T', ' ').slice(0, 19) : "";
-      const safeEmail = (p.rawEmail || "").replace(/"/g, '""');
-      const safeCanonical = (p.canonicalEmail || "").replace(/"/g, '""');
-      const safeCode = (p.referralCode || "").replace(/"/g, '""');
+    // Row 3: Blank separator
+    worksheet.getRow(3).height = 8;
 
-      csv += `${idx + 1},"${safeEmail}","${safeCanonical}",${p.status},${p.verifiedReferrals},"${safeCode}","${joined}","${verified}"\n`;
+    // 2. Table Headers (Row 4)
+    const headers = [
+      "Rank",
+      "Subscriber Email",
+      "Canonical Email",
+      "Queue Status",
+      "Verified Referrals",
+      "Unique Invite Code",
+      "Joined Date (UTC)",
+      "Verified Date (UTC)",
+    ];
+
+    const headerRow = worksheet.getRow(4);
+    headerRow.values = headers;
+    headerRow.height = 26;
+
+    headers.forEach((_, colIndex) => {
+      const cell = headerRow.getCell(colIndex + 1);
+      cell.font = { name: "Arial", size: 10, bold: true, color: { argb: "FFFFFFFF" } };
+      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF18181B" } };
+      cell.alignment = { vertical: "middle", horizontal: colIndex === 0 || colIndex === 3 || colIndex === 4 ? "center" : "left" };
+      cell.border = {
+        top: { style: "thin", color: { argb: "FF27272A" } },
+        bottom: { style: "medium", color: { argb: "FF09090B" } },
+      };
     });
 
+    // 3. Columns Widths
+    worksheet.columns = [
+      { key: "rank", width: 10 },
+      { key: "email", width: 34 },
+      { key: "canonical", width: 34 },
+      { key: "status", width: 18 },
+      { key: "referrals", width: 20 },
+      { key: "code", width: 22 },
+      { key: "joinedAt", width: 22 },
+      { key: "verifiedAt", width: 22 },
+    ];
+
+    // 4. Populate Data Rows with Zebra Striping and Status Pills
+    participants.forEach((p, idx) => {
+      const rowNum = 5 + idx;
+      const row = worksheet.getRow(rowNum);
+      const isEven = idx % 2 === 0;
+
+      const joinedStr = p.joinedAt ? p.joinedAt.toISOString().replace("T", " ").slice(0, 19) : "";
+      const verifiedStr = p.verifiedAt ? p.verifiedAt.toISOString().replace("T", " ").slice(0, 19) : "";
+
+      row.values = [
+        idx + 1,
+        p.rawEmail,
+        p.canonicalEmail,
+        p.status,
+        p.verifiedReferrals,
+        p.referralCode,
+        joinedStr,
+        verifiedStr,
+      ];
+      row.height = 22;
+
+      for (let c = 1; c <= 8; c++) {
+        const cell = row.getCell(c);
+        cell.font = { name: "Arial", size: 9.5 };
+        cell.border = {
+          bottom: { style: "thin", color: { argb: "FFE4E4E7" } },
+          right: { style: "thin", color: { argb: "FFF4F4F5" } },
+        };
+
+        if (c === 1 || c === 5) {
+          cell.alignment = { vertical: "middle", horizontal: "center" };
+        } else if (c === 4) {
+          cell.alignment = { vertical: "middle", horizontal: "center" };
+        } else {
+          cell.alignment = { vertical: "middle", horizontal: "left" };
+        }
+
+        if (!isEven) {
+          cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFAFAFA" } };
+        }
+
+        if (c === 4) {
+          if (p.status === "ADMITTED") {
+            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFEDE9FE" } };
+            cell.font = { name: "Arial", size: 9.5, bold: true, color: { argb: "FF5B21B6" } };
+          } else if (p.status === "VERIFIED") {
+            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFDCFCE7" } };
+            cell.font = { name: "Arial", size: 9.5, bold: true, color: { argb: "FF166534" } };
+          } else {
+            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFEF3C7" } };
+            cell.font = { name: "Arial", size: 9.5, bold: true, color: { argb: "FF92400E" } };
+          }
+        }
+      }
+    });
+
+    // 5. Excel AutoFilter Dropdowns
+    worksheet.autoFilter = {
+      from: { row: 4, column: 1 },
+      to: { row: 4, column: 8 },
+    };
+
+    const buffer = await workbook.xlsx.writeBuffer();
     return {
-      csv,
+      buffer: Buffer.from(buffer),
       campaignName: campaign.name.replace(/[^a-zA-Z0-9_-]/g, "_"),
-      totalCount: participants.length,
     };
   }
 

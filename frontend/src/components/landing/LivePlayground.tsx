@@ -38,7 +38,7 @@ export function LivePlayground() {
         particleCount: 35,
         spread: 50,
         origin: { y: 0.7 },
-        colors: ["#3074FE", "#0A0A0A", "#14804A"],
+        colors: ["#10B981", "#0A0A0A", "#71717A"],
       });
     } catch (err: any) {
       setError(err.message || "Unable to reach waitlist server. Please check the backend connection.");
@@ -85,7 +85,7 @@ export function LivePlayground() {
         particleCount: 30,
         spread: 45,
         origin: { y: 0.7 },
-        colors: ["#3074FE", "#14804A"],
+        colors: ["#10B981", "#0A0A0A"],
       });
 
       setTimeout(() => setSpotsJumped(null), 3000);
@@ -149,7 +149,7 @@ export function LivePlayground() {
                     placeholder="you@company.com"
                     required
                     disabled={loading}
-                    className="flex-1 bg-white border border-black/[0.09] shadow-inner rounded-xl px-3.5 py-2 text-[13px] text-[#0A0A0A] placeholder-[#A1A1A1] focus:outline-none focus:border-[#3074FE] transition"
+                    className="flex-1 bg-white border border-black/[0.09] shadow-inner rounded-xl px-3.5 py-2 text-[13px] text-[#0A0A0A] placeholder-[#A1A1A1] focus:outline-none focus:border-black/40 transition"
                   />
                   <button
                     type="submit"
@@ -165,7 +165,7 @@ export function LivePlayground() {
                     type="button"
                     onClick={handleQuickDemo}
                     disabled={loading}
-                    className="text-[12px] text-[#3074FE] hover:underline font-medium cursor-pointer"
+                    className="text-[12px] text-[#0A0A0A] hover:underline font-medium cursor-pointer"
                   >
                     Fill sample email
                   </button>

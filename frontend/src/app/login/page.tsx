@@ -113,7 +113,7 @@ export default function LoginPage() {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Alex Rivera"
                   required
-                  className="w-full bg-[#FAFAFA] border border-black/[0.09] focus:bg-white focus:border-[#3074FE] focus:outline-none rounded-xl px-3.5 py-2.5 text-sm text-[#0A0A0A] placeholder-[#A1A1A1] transition"
+                  className="w-full bg-[#FAFAFA] border border-black/[0.09] focus:bg-white focus:border-black/40 focus:outline-none rounded-xl px-3.5 py-2.5 text-sm text-[#0A0A0A] placeholder-[#A1A1A1] transition"
                 />
               </div>
             )}
@@ -126,7 +126,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="founder@company.com"
                 required
-                className="w-full bg-[#FAFAFA] border border-black/[0.09] focus:bg-white focus:border-[#3074FE] focus:outline-none rounded-xl px-3.5 py-2.5 text-sm text-[#0A0A0A] placeholder-[#A1A1A1] transition"
+                className="w-full bg-[#FAFAFA] border border-black/[0.09] focus:bg-white focus:border-black/40 focus:outline-none rounded-xl px-3.5 py-2.5 text-sm text-[#0A0A0A] placeholder-[#A1A1A1] transition"
               />
             </div>
 
@@ -139,7 +139,7 @@ export default function LoginPage() {
                 placeholder="••••••••••••"
                 required
                 minLength={8}
-                className="w-full bg-[#FAFAFA] border border-black/[0.09] focus:bg-white focus:border-[#3074FE] focus:outline-none rounded-xl px-3.5 py-2.5 text-sm text-[#0A0A0A] placeholder-[#A1A1A1] transition"
+                className="w-full bg-[#FAFAFA] border border-black/[0.09] focus:bg-white focus:border-black/40 focus:outline-none rounded-xl px-3.5 py-2.5 text-sm text-[#0A0A0A] placeholder-[#A1A1A1] transition"
               />
             </div>
 
@@ -166,7 +166,7 @@ export default function LoginPage() {
                 setIsRegister(!isRegister);
                 setError(null);
               }}
-              className="text-[#3074FE] hover:underline font-medium cursor-pointer"
+              className="text-[#0A0A0A] hover:underline font-medium cursor-pointer"
             >
               {isRegister ? "Sign in" : "Create one"}
             </button>

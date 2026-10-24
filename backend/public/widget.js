@@ -40,7 +40,7 @@
       const referralCodeParam = urlParams.get("ref");
       const theme = container.getAttribute("data-theme") || "dark";
       const isLight = theme === "light";
-      const accentColor = container.getAttribute("data-accent") || "#3074FE";
+      const accentColor = container.getAttribute("data-accent") || (isLight ? "#0A0A0A" : "#FFFFFF");
 
       // Attach Shadow DOM for 100% CSS isolation
       const shadow = container.attachShadow({ mode: "open" });
@@ -173,7 +173,7 @@
           align-items: center;
           gap: 6px;
           background: ${isLight ? "rgba(0, 0, 0, 0.04)" : "rgba(255, 255, 255, 0.06)"};
-          color: #3074FE;
+          color: ${isLight ? "#0A0A0A" : "#FFFFFF"};
           font-size: 11px;
           font-weight: 600;
           text-transform: uppercase;
@@ -188,7 +188,7 @@
           height: 6px;
           border-radius: 50%;
           background: #10B981;
-          box-shadow: 0 0 8px #3074FE;
+          box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
         }
         .qj-title {
           font-size: 20px;
@@ -223,15 +223,14 @@
           transition: border-color 0.15s, background 0.15s;
         }
         .qj-input:focus {
-          border-color: #3074FE;
-          background: #1C1C28;
+          border-color: ${isLight ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.4)"};
+          background: ${isLight ? "#FFFFFF" : "#1C1C28"};
         }
         .qj-btn {
           width: 100%;
-          background: ${accentColor !== "#3074FE" ? accentColor : (isLight ? "#0A0A0A" : "#FFFFFF")};
-          color: ${accentColor !== "#3074FE" ? "#FFFFFF" : (isLight ? "#FFFFFF" : "#0A0A0A")};
-          box-shadow: ${isLight ? "0 1px 2px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.06)" : "0 2px 8px rgba(255,255,255,0.1)"};
-          color: #FFFFFF;
+          background: ${accentColor};
+          color: ${accentColor === "#FFFFFF" ? "#0A0A0A" : "#FFFFFF"};
+          box-shadow: ${isLight ? "0 1px 2px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.06)" : "0 2px 8px rgba(255,255,255,0.08)"};
           font-size: 14px;
           font-weight: 600;
           border: none;
@@ -389,7 +388,7 @@
               <span>&rarr;</span>
             </button>
           </form>
-          <div class="qj-powered">Powered by <a href="https://queuejump.dev" target="_blank" rel="noopener">QueueJump</a></div>
+          <div class="qj-powered">Powered by <a href="${apiUrl.replace('/api/v1', '')}" target="_blank" rel="noopener">QueueJump</a></div>
         `;
 
         const form = wrapper.querySelector("#qj-signup-form");
@@ -485,7 +484,7 @@
               WhatsApp
             </a>
           </div>
-          <div class="qj-powered">Powered by <a href="https://queuejump.dev" target="_blank" rel="noopener">QueueJump</a></div>
+          <div class="qj-powered">Powered by <a href="${apiUrl.replace('/api/v1', '')}" target="_blank" rel="noopener">QueueJump</a></div>
         `;
 
         const copyBtn = wrapper.querySelector("#qj-copy-link-btn");

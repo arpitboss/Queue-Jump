@@ -51,12 +51,15 @@ export async function handleDeleteCampaign(req: Request, res: Response, next: Ne
 export async function handleExportParticipants(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const result = await campaignService.exportParticipants(req.tenant!.id, req.params.id as string);
-    res.setHeader("Content-Type", "text/csv");
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename="waitlist-${result.campaignName}.csv"`
+      `attachment; filename="waitlist_${result.campaignName}.xlsx"`
     );
-    res.status(200).send(result.csv);
+    res.status(200).send(result.buffer);
   } catch (err) {
     next(err);
   }

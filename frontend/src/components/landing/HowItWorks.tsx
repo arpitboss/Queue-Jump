@@ -2,21 +2,22 @@
 
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
+import { API_URL } from "@/lib/api";
 
 export function HowItWorks() {
   const [activeTab, setActiveTab] = useState<"widget" | "api">("widget");
   const [copied, setCopied] = useState(false);
 
   const widgetCode = `<!-- Drop in anywhere: Webflow, Framer, Next.js, or HTML -->
-<div id="queuejump-waitlist" data-campaign="pk_live_your_key"></div>
-<script src="https://queuejump.dev/embed.js" async></script>`;
+<div id="queuejump" data-key="pk_live_your_campaign_key" data-theme="dark"></div>
+<script src="${API_URL}/widget.js" async></script>`;
 
-  const apiCode = `// Or call the REST API from any backend
-const res = await fetch("https://api.queuejump.dev/v1/waitlist/join", {
+  const apiCode = `// Or submit from your custom form or mobile app
+const res = await fetch("${API_URL}/api/v1/waitlist/join", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
-    "X-Campaign-Key": "pk_live_your_key",
+    "X-Campaign-Key": "pk_live_your_campaign_key",
   },
   body: JSON.stringify({
     email: "subscriber@company.com",

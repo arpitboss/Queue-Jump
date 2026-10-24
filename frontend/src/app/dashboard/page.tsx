@@ -97,7 +97,7 @@ export default function DashboardPage() {
   }, [loadData]);
 
   
-  async function handleExportCSV() {
+  async function handleExportExcel() {
     if (!selectedCampaign) return;
     setExporting(true);
     try {
@@ -107,12 +107,12 @@ export default function DashboardPage() {
           Authorization: `Bearer ${token}`,
         },
       });
-      if (!res.ok) throw new Error("Could not generate CSV export.");
+      if (!res.ok) throw new Error("Could not generate Excel export.");
       const blob = await res.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = downloadUrl;
-      a.download = `waitlist_${selectedCampaign.name.toLowerCase().replace(/[^a-z0-9_-]/g, "_")}.csv`;
+      a.download = `waitlist_${selectedCampaign.name.toLowerCase().replace(/[^a-z0-9_-]/g, "_")}.xlsx`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -260,7 +260,7 @@ export default function DashboardPage() {
             className="p-2 bg-white hover:bg-neutral-50 border border-black/[0.08] rounded-xl text-[#737373] hover:text-[#0A0A0A] transition cursor-pointer"
             title="Refresh"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin text-[#3074FE]" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin text-[#0A0A0A]" : ""}`} />
           </button>
 
           <button
@@ -349,13 +349,13 @@ export default function DashboardPage() {
         {activeTab === "leaderboard" && (
           <div className="flex items-center gap-2">
             <button
-              onClick={handleExportCSV}
+              onClick={handleExportExcel}
               disabled={exporting}
               className="btn-vibrant-white text-xs px-3.5 py-1.5 inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               title="Download entire waitlist as CSV"
             >
               <Download className="w-3.5 h-3.5 text-[#737373]" />
-              <span>{exporting ? "Generating CSV..." : "Export CSV"}</span>
+              <span>{exporting ? "Generating Excel..." : "Export Excel (.xlsx)"}</span>
             </button>
             <button
               onClick={() => setShowAdmitModal(true)}
@@ -579,7 +579,7 @@ export default function DashboardPage() {
                 href={`/embed/${selectedCampaign.publicKey}?theme=${widgetTheme}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#3074FE] hover:underline inline-flex items-center gap-1 font-medium ml-2"
+                className="text-[#0A0A0A] hover:underline inline-flex items-center gap-1 font-medium ml-2"
               >
                 <span>Preview ({widgetTheme.toUpperCase()})</span>
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -600,67 +600,138 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-4 pt-2">
-            {/* Guide Card 1: Drop-in Embed */}
-            <div className="bg-[#F7F7F8] border border-black/[0.06] rounded-xl p-5 space-y-3 hover:border-black/15 transition shadow-xs">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-white border border-black/[0.08] shadow-xs flex items-center justify-center shrink-0">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#0A0A0A]">
-                    <polyline points="16 18 22 12 16 6" />
-                    <polyline points="8 6 2 12 8 18" />
-                  </svg>
+          <div className="grid md:grid-cols-3 gap-5 pt-2">
+            {/* FlyingPress-Style Card 1: Drop-in Widget with Mini Interactive Mockup */}
+            <div className="bg-white border border-black/[0.08] rounded-2xl p-5 space-y-4 hover:shadow-md transition duration-200 flex flex-col justify-between">
+              <div>
+                {/* Visual Tactile Widget Illustration */}
+                <div className="bg-gradient-to-b from-[#F9F9FB] to-[#F1F1F4] border border-black/[0.06] rounded-xl p-4 shadow-inner mb-4 relative overflow-hidden select-none">
+                  <div className="w-full bg-white border border-black/[0.08] rounded-xl p-3 shadow-sm space-y-2 relative">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#0A0A0A]" />
+                        <span className="text-[10px] font-bold text-[#0A0A0A]">Priority Waitlist</span>
+                      </div>
+                      <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        Active
+                      </span>
+                    </div>
+                    <div className="bg-[#F7F7F8] border border-black/[0.06] rounded-md px-2 py-1 text-[10px] text-zinc-400">
+                      founder@startup.com
+                    </div>
+                    <div className="w-full bg-[#0A0A0A] text-white text-[10px] font-semibold py-1.5 rounded-md text-center shadow-xs flex items-center justify-center gap-1">
+                      <span>Get Early Access</span>
+                      <span>&rarr;</span>
+                    </div>
+
+                    {/* Realistic Floating Cursor */}
+                    <div className="absolute -bottom-2 -right-1 pointer-events-none drop-shadow-md">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#0A0A0A" stroke="#FFFFFF" strokeWidth="1.5">
+                        <path d="M3 3l7 18 3-7 7-3L3 3z" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Feature Check Pills */}
+                  <div className="flex flex-wrap items-center justify-center gap-1.5 pt-3">
+                    <span className="text-[9.5px] font-medium bg-white/80 border border-black/[0.06] text-zinc-600 px-2 py-0.5 rounded-full shadow-2xs">
+                      &#10003; Shadow DOM
+                    </span>
+                    <span className="text-[9.5px] font-medium bg-white/80 border border-black/[0.06] text-zinc-600 px-2 py-0.5 rounded-full shadow-2xs">
+                      &#10003; Zero CSS Bleed
+                    </span>
+                    <span className="text-[9.5px] font-medium bg-white/80 border border-black/[0.06] text-zinc-600 px-2 py-0.5 rounded-full shadow-2xs">
+                      &#10003; Dark / Light
+                    </span>
+                  </div>
                 </div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[#0A0A0A]">Drop-in Widget</h4>
+
+                <h4 className="text-sm font-bold text-[#0A0A0A] mb-1">Drop-in Widget</h4>
+                <p className="text-xs text-[#737373] leading-relaxed">
+                  Embed into Webflow, Framer, WordPress, Shopify, or plain HTML. Runs inside Shadow DOM for 100% CSS isolation from host styles.
+                </p>
               </div>
-              <p className="text-xs text-[#737373] leading-relaxed">
-                Paste the 2-line snippet into Webflow, Framer, WordPress, or HTML. Encapsulated in browser Shadow DOM for 100% style isolation.
-              </p>
-              <div className="bg-[#18181B] text-zinc-300 p-2.5 rounded-lg text-[11px] font-mono leading-tight">
-                <span className="text-zinc-500">&lt;div</span> data-theme="dark|light"<br/>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;data-accent="#HEX" <span className="text-zinc-500">/&gt;</span>
+
+              <div className="bg-[#18181B] text-zinc-300 p-2.5 rounded-xl text-[11px] font-mono">
+                <span className="text-zinc-500">&lt;div</span> id="queuejump" data-theme="dark|light" <span className="text-zinc-500">/&gt;</span>
               </div>
             </div>
 
-            {/* Guide Card 2: Headless API */}
-            <div className="bg-[#F7F7F8] border border-black/[0.06] rounded-xl p-5 space-y-3 hover:border-black/15 transition shadow-xs">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-white border border-black/[0.08] shadow-xs flex items-center justify-center shrink-0">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#0A0A0A]">
-                    <rect x="2" y="4" width="20" height="16" rx="4" />
-                    <path d="M7 10l3 2-3 2" />
-                    <line x1="13" y1="14" x2="17" y2="14" />
-                  </svg>
+            {/* FlyingPress-Style Card 2: Headless API with Tactile Switch Toggles */}
+            <div className="bg-white border border-black/[0.08] rounded-2xl p-5 space-y-4 hover:shadow-md transition duration-200 flex flex-col justify-between">
+              <div>
+                {/* Visual Control Panel with Toggle Switches */}
+                <div className="bg-gradient-to-b from-[#F9F9FB] to-[#F1F1F4] border border-black/[0.06] rounded-xl p-3.5 shadow-inner mb-4 space-y-2 select-none">
+                  <div className="bg-white border border-black/[0.08] rounded-lg p-2 flex items-center justify-between shadow-2xs">
+                    <span className="text-[10px] font-medium text-[#0A0A0A]">Redis ZSET Real-Time Ranks</span>
+                    <div className="w-7 h-4 bg-emerald-500 rounded-full relative shadow-inner">
+                      <div className="w-3.5 h-3.5 bg-white rounded-full absolute right-0.5 top-0.5 shadow-xs" />
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-black/[0.08] rounded-lg p-2 flex items-center justify-between shadow-2xs">
+                    <span className="text-[10px] font-medium text-[#0A0A0A]">Auto ?ref= Attribution</span>
+                    <div className="w-7 h-4 bg-emerald-500 rounded-full relative shadow-inner">
+                      <div className="w-3.5 h-3.5 bg-white rounded-full absolute right-0.5 top-0.5 shadow-xs" />
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-black/[0.08] rounded-lg p-2 flex items-center justify-between shadow-2xs">
+                    <span className="text-[10px] font-medium text-[#0A0A0A]">Anti-Fraud IP Rate Limit</span>
+                    <div className="w-7 h-4 bg-emerald-500 rounded-full relative shadow-inner">
+                      <div className="w-3.5 h-3.5 bg-white rounded-full absolute right-0.5 top-0.5 shadow-xs" />
+                    </div>
+                  </div>
                 </div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[#0A0A0A]">Headless REST API</h4>
+
+                <h4 className="text-sm font-bold text-[#0A0A0A] mb-1">Headless REST API</h4>
+                <p className="text-xs text-[#737373] leading-relaxed">
+                  Have a bespoke Figma design? Connect your custom React, Next.js, or mobile form directly with sub-millisecond ranking.
+                </p>
               </div>
-              <p className="text-xs text-[#737373] leading-relaxed">
-                Have a custom Figma design? Submit directly from your React/Next.js/Vue form with your campaign key header.
-              </p>
-              <div className="bg-[#18181B] text-zinc-300 p-2.5 rounded-lg text-[11px] font-mono leading-tight">
-                <span className="text-emerald-400 font-semibold">POST</span> /api/v1/waitlist/join<br/>
-                <span className="text-zinc-500">Header:</span> X-Campaign-Key
+
+              <div className="bg-[#18181B] text-zinc-300 p-2.5 rounded-xl text-[11px] font-mono flex items-center justify-between">
+                <div>
+                  <span className="text-emerald-400 font-bold">POST</span> /api/v1/waitlist/join
+                </div>
+                <span className="text-[9.5px] bg-white/10 px-1.5 py-0.5 rounded text-zinc-300">200 OK • 12ms</span>
               </div>
             </div>
 
-            {/* Guide Card 3: Webhooks & Automations */}
-            <div id="webhook-guide-card" className="bg-[#F7F7F8] border border-black/[0.06] rounded-xl p-5 space-y-3 hover:border-black/15 transition shadow-xs scroll-mt-20">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-white border border-black/[0.08] shadow-xs flex items-center justify-center shrink-0">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#0A0A0A]">
-                    <circle cx="12" cy="5" r="3" />
-                    <circle cx="5" cy="19" r="3" />
-                    <circle cx="19" cy="19" r="3" />
-                    <path d="M5 16l7-8 7 8" />
-                  </svg>
+            {/* FlyingPress-Style Card 3: Webhooks & Sync with Radial Workflow Hub */}
+            <div id="webhook-guide-card" className="bg-white border border-black/[0.08] rounded-2xl p-5 space-y-4 hover:shadow-md transition duration-200 flex flex-col justify-between scroll-mt-20">
+              <div>
+                {/* Visual Radial Hub & Spoke Flow */}
+                <div className="bg-gradient-to-b from-[#F9F9FB] to-[#F1F1F4] border border-black/[0.06] rounded-xl p-3.5 shadow-inner mb-4 flex items-center justify-center relative overflow-hidden select-none min-h-[110px]">
+                  {/* Center Node */}
+                  <div className="relative z-10 w-11 h-11 rounded-2xl bg-[#0A0A0A] text-white flex items-center justify-center font-bold text-[11px] shadow-md border border-white/20">
+                    QJ
+                  </div>
+
+                  {/* Radiating Orbit Ring */}
+                  <div className="absolute w-24 h-24 rounded-full border border-black/[0.08] border-dashed animate-spin-slow pointer-events-none" />
+
+                  {/* Orbiting Satellite Apps */}
+                  <div className="absolute top-2 left-3 bg-white border border-black/[0.08] rounded-md px-1.5 py-0.5 text-[9px] font-semibold text-zinc-700 shadow-2xs">
+                    #Slack
+                  </div>
+                  <div className="absolute top-2 right-3 bg-white border border-black/[0.08] rounded-md px-1.5 py-0.5 text-[9px] font-semibold text-zinc-700 shadow-2xs">
+                    Loops/Beehiiv
+                  </div>
+                  <div className="absolute bottom-2 bg-white border border-black/[0.08] rounded-md px-1.5 py-0.5 text-[9px] font-semibold text-zinc-700 shadow-2xs">
+                    App DB & Auth
+                  </div>
                 </div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[#0A0A0A]">Webhooks & Sync</h4>
+
+                <h4 className="text-sm font-bold text-[#0A0A0A] mb-1">Webhooks & Sync</h4>
+                <p className="text-xs text-[#737373] leading-relaxed">
+                  Receive cryptographically signed HMAC-SHA256 payloads to sync subscribers to Loops, trigger Slack alerts, or grant beta access.
+                </p>
               </div>
-              <p className="text-xs text-[#737373] leading-relaxed">
-                Receive real-time signed JSON events to trigger Slack notifications, add users to Beehiiv/Loops, or grant beta access.
-              </p>
-              <div className="bg-[#18181B] text-zinc-300 p-2.5 rounded-lg text-[11px] font-mono leading-tight">
-                <span className="text-amber-400">Events:</span> participant.verified<br/>
-                milestone.unlocked, admitted
+
+              <div className="bg-[#18181B] text-zinc-300 p-2.5 rounded-xl text-[11px] font-mono">
+                <span className="text-amber-400">Events:</span> participant.verified, admitted
               </div>
             </div>
           </div>
@@ -668,11 +739,13 @@ export default function DashboardPage() {
           {/* Quick API Examples */}
           <div className="border-t border-black/[0.06] pt-4 space-y-3">
             <h4 className="text-xs font-semibold text-[#0A0A0A]">Headless API Request Example (cURL)</h4>
-            <div className="bg-[#18181B] text-zinc-300 p-3 rounded-lg font-mono text-[11.5px] overflow-x-auto">
-              curl -X POST ${API_URL}/api/v1/waitlist/join \<br/>
-              &nbsp;&nbsp;-H "Content-Type: application/json" \<br/>
-              &nbsp;&nbsp;-H "X-Campaign-Key: ${selectedCampaign.publicKey}" \<br/>
-              &nbsp;&nbsp;-d '&#123; "email": "founder@startup.com", "referralCode": "optional_ref" &#125;'
+            <div className="bg-[#18181B] text-zinc-300 p-3.5 rounded-xl font-mono text-[11.5px] overflow-x-auto relative leading-relaxed">
+              <pre className="text-zinc-200">
+{`curl -X POST ${API_URL}/api/v1/waitlist/join \\
+  -H "Content-Type: application/json" \\
+  -H "X-Campaign-Key: ${selectedCampaign.publicKey}" \\
+  -d '{"email": "founder@startup.com", "referralCode": "optional_ref"}'`}
+              </pre>
             </div>
           </div>
         </div>
@@ -787,7 +860,7 @@ export default function DashboardPage() {
                   onChange={(e) => setAdmitCount(Number(e.target.value))}
                   min={1}
                   max={500}
-                  className="w-full bg-[#F7F7F8] border border-black/[0.08] focus:border-[#3074FE] focus:bg-white rounded-lg px-3 py-2 text-[#0A0A0A] outline-none"
+                  className="w-full bg-[#F7F7F8] border border-black/[0.08] focus:border-black/40 focus:bg-white rounded-lg px-3 py-2 text-[#0A0A0A] outline-none"
                 />
               </div>
 
@@ -832,7 +905,7 @@ export default function DashboardPage() {
                   onChange={(e) => setNewCampaignName(e.target.value)}
                   placeholder="Beta Launch Waitlist"
                   required
-                  className="w-full bg-[#F7F7F8] border border-black/[0.08] focus:border-[#3074FE] focus:bg-white rounded-lg px-3 py-2 text-[#0A0A0A] outline-none"
+                  className="w-full bg-[#F7F7F8] border border-black/[0.08] focus:border-black/40 focus:bg-white rounded-lg px-3 py-2 text-[#0A0A0A] outline-none"
                 />
               </div>
 

@@ -46,7 +46,7 @@ function EmbedContent() {
         particleCount: 50,
         spread: 60,
         origin: { y: 0.65 },
-        colors: ["#3074FE", isDark ? "#FFFFFF" : "#0A0A0A", "#737373"],
+        colors: ["#10B981", isDark ? "#FFFFFF" : "#0A0A0A", "#71717A"],
       });
     } catch (err: any) {
       setError(err.message || "Could not reserve spot. Please verify your email.");
@@ -95,8 +95,8 @@ function EmbedContent() {
             disabled={loading}
             className={`w-full rounded-lg px-3.5 py-2.5 text-sm outline-none transition ${
               isDark
-                ? "bg-[#181822] border border-white/10 text-white placeholder-[#71717A] focus:border-[#3074FE] focus:bg-[#1C1C28]"
-                : "bg-[#F7F7F8] border border-black/[0.08] text-[#0A0A0A] placeholder-[#A1A1A1] focus:border-[#3074FE] focus:bg-white"
+                ? "bg-[#181822] border border-white/10 text-white placeholder-[#71717A] focus:border-black/40 focus:bg-[#1C1C28]"
+                : "bg-[#F7F7F8] border border-black/[0.08] text-[#0A0A0A] placeholder-[#A1A1A1] focus:border-black/40 focus:bg-white"
             }`}
           />
 

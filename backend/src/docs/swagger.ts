@@ -1,4 +1,5 @@
 import { Router, Request, Response } from "express";
+import { env } from "../config/env";
 
 export const swaggerRouter = Router();
 
@@ -11,13 +12,17 @@ export function getOpenApiSpec(hostUrl: string) {
       description:
         "Production-grade, high-concurrency viral waitlist and referral engine with sub-millisecond Redis ZSET rank calculations, anti-fraud shields, and automated cohort rollouts.",
       contact: {
-        name: "QueueJump Engineering",
-        url: "https://queuejump.dev",
+        name: "QueueJump Product & Web App",
+        url: env.APP_URL,
       },
     },
+    externalDocs: {
+      description: "QueueJump Founder Dashboard & Web App",
+      url: env.APP_URL,
+    },
     servers: [
-      { url: hostUrl, description: "Active Server Environment" },
-      { url: "http://localhost:4000", description: "Local Development" },
+      { url: hostUrl, description: "Active API Host" },
+      { url: env.API_URL, description: "Configured API Environment" },
     ],
     tags: [
       { name: "Public Waitlist", description: "Client-facing endpoints for widget embeds and public forms" },
@@ -267,15 +272,51 @@ swaggerRouter.get("/", (_req: Request, res: Response) => {
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
   <style>
     body { margin: 0; background: #0A0A0C; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .topbar-nav {
+      background: #141417;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topbar-nav a {
+      color: #EDEDED;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.15s;
+    }
+    .topbar-nav a:hover {
+      color: #10B981;
+    }
+    .topbar-nav .pill {
+      font-size: 11px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #A1A1AA;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      font-family: monospace;
+    }
     .swagger-ui .topbar { display: none; }
     .swagger-ui { filter: invert(88%) hue-rotate(180deg); max-width: 1000px; margin: 0 auto; padding: 24px; }
-    .swagger-ui .info h2 { color: #3074FE !important; }
-    .swagger-ui .btn.execute { background-color: #3074FE !important; border-color: #3074FE !important; color: #fff !important; }
+    .swagger-ui .info h2 { color: #0A0A0A !important; }
+    .swagger-ui .btn.execute { background-color: #0A0A0A !important; border-color: #0A0A0A !important; color: #fff !important; }
     .swagger-ui .opblock.opblock-post { border-color: #49cc90; }
     .swagger-ui .opblock.opblock-get { border-color: #61affe; }
   </style>
 </head>
 <body>
+  <div class="topbar-nav">
+    <a href="${env.APP_URL}">
+      <span>&larr; Return to QueueJump App</span>
+    </a>
+    <span class="pill">v1.2.0 • OpenAPI 3.0</span>
+  </div>
   <div id="swagger-ui"></div>
   <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
   <script>

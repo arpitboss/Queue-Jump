@@ -15,12 +15,12 @@ export function BrandLogo({ className = "", href = "/" }: BrandLogoProps) {
         <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
           <path
             d="M4 8.5C4 5.5 6.5 3 9.5 3C13.5 3 17 6.5 17 10.5C17 14 14.5 16.5 11 16.5C6.5 16.5 4 12.5 4 8.5Z"
-            fill="#3074FE"
+            fill="#10B981"
             fillOpacity="0.25"
           />
           <path
             d="M3.5 8C3.5 5.5 5.5 3.5 8 3.5"
-            stroke="#3074FE"
+            stroke="#10B981"
             strokeWidth="2.2"
             strokeLinecap="round"
           />
