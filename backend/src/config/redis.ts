@@ -16,10 +16,9 @@ const redisUrl = new URL(redisUrlStr);
 export const redis = new Redis(redisUrlStr, {
   maxRetriesPerRequest: 3,
   enableReadyCheck: false,
-  lazyConnect: true,
-  commandTimeout: 3000,
+  commandTimeout: 5000,
   connectTimeout: 5000,
-  enableOfflineQueue: false,
+  enableOfflineQueue: true,
   family: 0,
   tls: isTls
     ? {
