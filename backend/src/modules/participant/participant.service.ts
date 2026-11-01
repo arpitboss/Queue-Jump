@@ -86,6 +86,19 @@ export class ParticipantService {
       const { position, total } = await leaderboardService.getRankTelemetry(campaign.id, existing.id);
       const nextMilestone = milestones.find((m: any) => m.count > existing.verifiedReferrals) || null;
 
+      // If participant is still PENDING and re-enters their email, resend verification email
+      if (existing.status === "PENDING" && existing.verificationToken) {
+        await dispatchEmail({
+          to: rawEmail,
+          type: "verification",
+          subject: `Verify your spot for ${campaign.name}`,
+          variables: {
+            verifyUrl: `${env.API_URL}/api/v1/waitlist/verify?token=${existing.verificationToken}`,
+            campaignName: campaign.name,
+          },
+        });
+      }
+
       return {
         isNewSignup: false,
         participantId: existing.id,

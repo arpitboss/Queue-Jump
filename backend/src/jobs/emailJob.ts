@@ -82,6 +82,17 @@ export function startEmailWorker() {
         return;
       }
 
+      // Format sender name dynamically: "[Campaign Name] via QueueJump <noreply@arpitverma.me>"
+      const fromEnv = env.EMAIL_FROM || "QueueJump <noreply@arpitverma.me>";
+      const emailMatch = fromEnv.match(/<([^>]+)>/);
+      const senderEmail = emailMatch ? emailMatch[1] : fromEnv.trim();
+
+      const senderDisplayName = variables.campaignName
+        ? `${variables.campaignName} via QueueJump`
+        : "QueueJump";
+
+      const fromHeader = `${senderDisplayName} <${senderEmail}>`;
+
       // If RESEND_API_KEY is configured, dispatch via Resend REST API
       const response = await fetch("https://api.resend.com/emails", {
         method: "POST",
@@ -90,7 +101,7 @@ export function startEmailWorker() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: env.EMAIL_FROM || "QueueJump <noreply@arpitverma.me>",
+          from: fromHeader,
           to: [to],
           subject,
           html: htmlContent,
