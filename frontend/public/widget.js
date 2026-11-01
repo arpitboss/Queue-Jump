@@ -495,12 +495,64 @@
 
         const copyBtn = wrapper.querySelector("#qj-copy-link-btn");
         copyBtn.addEventListener("click", () => {
-          navigator.clipboard.writeText(activeReferralLink);
-          copyBtn.textContent = "Copied!";
-          setTimeout(() => {
-            copyBtn.textContent = "Copy";
-          }, 2000);
+          function markCopied() {
+            copyBtn.textContent = "Copied!";
+            copyBtn.style.background = "#10B981";
+            copyBtn.style.color = "#FFFFFF";
+            setTimeout(() => {
+              copyBtn.textContent = "Copy";
+              copyBtn.style.background = "";
+              copyBtn.style.color = "";
+            }, 2000);
+          }
+
+          if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(activeReferralLink).then(markCopied).catch(fallback);
+          } else {
+            fallback();
+          }
+
+          function fallback() {
+            const ta = document.createElement("textarea");
+            ta.value = activeReferralLink;
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+              document.execCommand("copy");
+              markCopied();
+            } catch (e) {
+              prompt("Copy your referral link:", activeReferralLink);
+            }
+            document.body.removeChild(ta);
+          }
         });
+
+        // Auto-update widget when user verifies in another tab/device
+        if (data.status === "PENDING" && data.referralCode) {
+          const pollTimer = setInterval(async () => {
+            try {
+              const res = await fetch(`${apiUrl}/waitlist/status/${data.referralCode}`, {
+                headers: { "X-Campaign-Key": campaignKey },
+              });
+              if (res.ok) {
+                const pollData = await res.json();
+                if (pollData.status === "VERIFIED") {
+                  clearInterval(pollTimer);
+                  const banner = wrapper.querySelector(".qj-pending-banner");
+                  if (banner) {
+                    banner.innerHTML = `<div style="font-weight: 600; color: #10B981;">&#10003; Email Verified!</div><div style="font-size: 11px; color: #6B7280; margin-top: 2px;">Your spot has been confirmed.</div>`;
+                    banner.style.background = "rgba(16, 185, 129, 0.08)";
+                    banner.style.borderColor = "rgba(16, 185, 129, 0.25)";
+                  }
+                  const posNum = wrapper.querySelector(".qj-position-num");
+                  if (posNum && pollData.position) {
+                    posNum.textContent = "#" + pollData.position;
+                  }
+                }
+              }
+            } catch (e) {}
+          }, 2500);
+        }
       }
 
       renderJoinView();

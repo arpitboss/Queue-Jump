@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { Check, Copy, AlertCircle } from "lucide-react";
 import confetti from "canvas-confetti";
@@ -21,6 +21,37 @@ function EmbedContent() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [participant, setParticipant] = useState<JoinWaitlistResponse | null>(null);
+
+  // Auto-update page when email is verified in another tab/device
+  useEffect(() => {
+    if (!participant || participant.status !== "PENDING" || !publicKey) return;
+
+    let active = true;
+    const pollInterval = setInterval(async () => {
+      try {
+        const res = await apiRequest<{ status: string; position: number; totalParticipants: number }>(
+          `/api/v1/waitlist/status/${participant.referralCode}`,
+          { campaignKey: publicKey }
+        );
+        if (active && res.status === "VERIFIED") {
+          setParticipant((prev) => prev ? { ...prev, status: "VERIFIED", position: res.position } : null);
+          confetti({
+            particleCount: 50,
+            spread: 60,
+            origin: { y: 0.6 },
+            colors: ["#10B981", "#0A0A0A", "#71717A"],
+          });
+        }
+      } catch {
+        // Silently continue polling
+      }
+    }, 2500);
+
+    return () => {
+      active = false;
+      clearInterval(pollInterval);
+    };
+  }, [participant?.status, participant?.referralCode, publicKey]);
 
   async function handleJoin(e: React.FormEvent) {
     e.preventDefault();
@@ -57,9 +88,31 @@ function EmbedContent() {
 
   function copyReferral() {
     if (!participant) return;
-    navigator.clipboard.writeText(participant.referralLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(participant.referralLink).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }).catch(() => {
+        fallbackCopy(participant.referralLink);
+      });
+    } else {
+      fallbackCopy(participant.referralLink);
+    }
+  }
+
+  function fallbackCopy(text: string) {
+    const el = document.createElement("textarea");
+    el.value = text;
+    document.body.appendChild(el);
+    el.select();
+    try {
+      document.execCommand("copy");
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      prompt("Copy your referral link:", text);
+    }
+    document.body.removeChild(el);
   }
 
   return (

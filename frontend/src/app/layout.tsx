@@ -9,7 +9,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "QueueJump — Waitlist Referral Engine",
+  title: "QueueJump | Referral Waitlists for High-Growth Launches",
+  icons: {
+    icon: "/icon.svg",
+  },
   description: "Turn every waitlist signup into referrals with live queue positions, milestone rewards, and spam protection.",
 };
 

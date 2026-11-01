@@ -46,18 +46,19 @@ export async function handleVerifyEmail(req: Request, res: Response, next: NextF
     const token = (req.query.token as string) || req.body?.token;
     const result = await participantService.verifyEmail(token);
 
-    // If opened directly from an email client in browser, render a premium confirmation screen
+    // If opened directly from an email client in browser via GET, render a clean confirmation screen
     const isBrowserHtml = req.method === "GET" && req.accepts("html");
     if (isBrowserHtml) {
-      const waitlistPage = `${env.APP_URL}/embed/${result.publicKey}?ref=${result.referralCode}`;
+      const baseUrl = (env.APP_URL || "https://queuejump.arpitverma.me").replace(/\/+$/, "");
+      const referralLink = `${baseUrl}/embed/${result.publicKey}?ref=${result.referralCode}`;
       const founderDomain = result.allowedDomains?.split(",")[0]?.trim();
-      const destinationUrl = (founderDomain && founderDomain.startsWith("http"))
+      const hasFounderSite = founderDomain && founderDomain.startsWith("http");
+      const founderRedirectUrl = hasFounderSite
         ? `${founderDomain}${founderDomain.includes("?") ? "&" : "?"}ref=${result.referralCode}`
-        : waitlistPage;
+        : null;
 
-      const referralLink = waitlistPage;
       const encodedReferral = encodeURIComponent(referralLink);
-      const encodedShareText = encodeURIComponent(`I just joined the priority waitlist for ${result.campaignName || "this launch"}. Use my invite link to skip ahead in line:`);
+      const encodedShareText = encodeURIComponent(`I just reserved my spot for ${result.campaignName || "this waitlist"}. Use my invite link to skip ahead:`);
 
       const html = `<!DOCTYPE html>
 <html lang="en">
@@ -65,50 +66,193 @@ export async function handleVerifyEmail(req: Request, res: Response, next: NextF
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Spot Confirmed - ${result.campaignName || "QueueJump"}</title>
+  <link rel="icon" type="image/svg+xml" href="${baseUrl}/icon.svg">
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0A0A0C; color: #EDEDED; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
-    .card { background: #131318; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 36px 28px; max-width: 440px; width: 100%; text-align: center; box-shadow: 0 16px 50px rgba(0,0,0,0.6); }
-    .icon { width: 52px; height: 52px; border-radius: 50%; background: rgba(16,185,129,0.12); color: #10B981; display: inline-flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 18px; border: 1px solid rgba(16,185,129,0.25); }
-    h1 { font-size: 22px; font-weight: 700; color: #FFFFFF; margin: 0 0 6px 0; letter-spacing: -0.02em; }
-    .campaign-tag { font-size: 13px; color: #60A5FA; font-weight: 600; margin-bottom: 20px; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #FAFAFA;
+      color: #0A0A0A;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .card {
+      background: #FFFFFF;
+      border: 1px solid #E5E7EB;
+      border-radius: 16px;
+      padding: 36px 28px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+    .check-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.1);
+      color: #10B981;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0A0A0A;
+      margin: 0 0 4px 0;
+      letter-spacing: -0.02em;
+    }
+    .campaign-name {
+      font-size: 13px;
+      color: #52525B;
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
     
-    .position-pill { background: #1A1A22; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px; margin-bottom: 20px; }
-    .position-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #71717A; margin-bottom: 4px; font-weight: 600; }
-    .position-num { font-size: 32px; font-weight: 800; color: #FFFFFF; letter-spacing: -0.03em; }
+    .rank-card {
+      background: #F4F4F5;
+      border: 1px solid #E4E4E7;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .rank-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #71717A;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .rank-num {
+      font-size: 32px;
+      font-weight: 800;
+      color: #0A0A0A;
+      letter-spacing: -0.03em;
+    }
 
-    .link-section { margin-bottom: 20px; text-align: left; }
-    .link-label { font-size: 11px; font-weight: 600; color: #A1A1AA; margin-bottom: 6px; display: block; }
-    .link-box { display: flex; gap: 8px; }
-    .link-input { flex: 1; background: #0D0D11; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 9px 12px; font-size: 12px; color: #EDEDED; outline: none; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .copy-btn { background: #272730; color: #FFFFFF; border: 1px solid rgba(255,255,255,0.12); padding: 9px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; shrink-0; }
-    .copy-btn:hover { background: #32323D; }
+    .link-section {
+      margin-bottom: 18px;
+      text-align: left;
+    }
+    .link-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #71717A;
+      margin-bottom: 6px;
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .link-row {
+      display: flex;
+      gap: 8px;
+    }
+    .link-input {
+      flex: 1;
+      background: #FAFAFA;
+      border: 1px solid #D4D4D8;
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 12px;
+      color: #0A0A0A;
+      outline: none;
+      font-family: monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .copy-btn {
+      background: #0A0A0A;
+      color: #FFFFFF;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+    .copy-btn:hover {
+      background: #27272A;
+    }
 
-    .share-row { display: flex; gap: 8px; margin-bottom: 22px; }
-    .share-btn { flex: 1; padding: 8px; border-radius: 8px; font-size: 11px; font-weight: 600; text-decoration: none; text-align: center; border: 1px solid rgba(255,255,255,0.08); background: #181820; color: #D4D4D8; transition: background 0.15s; }
-    .share-btn:hover { background: #22222C; color: #FFFFFF; }
+    .share-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .share-btn {
+      flex: 1;
+      padding: 8px 6px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      text-decoration: none;
+      text-align: center;
+      border: 1px solid #E4E4E7;
+      background: #FAFAFA;
+      color: #52525B;
+      transition: all 0.15s;
+    }
+    .share-btn:hover {
+      background: #F4F4F5;
+      color: #0A0A0A;
+    }
 
-    .cta-btn { display: block; width: 100%; background: #FFFFFF; color: #0A0A0C; text-decoration: none; padding: 13px 0; border-radius: 10px; font-size: 13px; font-weight: 700; box-shadow: 0 4px 14px rgba(255,255,255,0.1); transition: opacity 0.15s; margin-bottom: 22px; }
-    .cta-btn:hover { opacity: 0.9; }
+    .return-btn {
+      display: block;
+      width: 100%;
+      background: #0A0A0A;
+      color: #FFFFFF;
+      text-decoration: none;
+      padding: 12px 0;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      transition: background 0.15s;
+    }
+    .return-btn:hover {
+      background: #27272A;
+    }
 
-    .brand-footer { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 18px; font-size: 11px; color: #71717A; }
-    .brand-footer a { color: #60A5FA; text-decoration: none; font-weight: 600; }
+    .brand-footer {
+      border-top: 1px solid #F4F4F5;
+      padding-top: 16px;
+      font-size: 11px;
+      color: #A1A1AA;
+    }
+    .brand-footer a {
+      color: #10B981;
+      text-decoration: none;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
   <div class="card">
-    <div class="icon">&#10003;</div>
+    <div class="check-icon">&#10003;</div>
     <h1>Spot Confirmed!</h1>
-    <div class="campaign-tag">${result.campaignName || "Priority Waitlist"}</div>
+    <div class="campaign-name">${result.campaignName || "Priority Waitlist"}</div>
 
-    <div class="position-pill">
-      <div class="position-label">Your Priority Position</div>
-      <div class="position-num">#${result.position}</div>
+    <div class="rank-card">
+      <div class="rank-label">Your Priority Position</div>
+      <div class="rank-num">#${result.position}</div>
     </div>
 
     <div class="link-section">
       <span class="link-label">Your Unique Referral Link</span>
-      <div class="link-box">
+      <div class="link-row">
         <input class="link-input" id="refLink" value="${referralLink}" readonly />
         <button class="copy-btn" id="copyBtn" onclick="copyReferral()">Copy</button>
       </div>
@@ -120,28 +264,48 @@ export async function handleVerifyEmail(req: Request, res: Response, next: NextF
       <a class="share-btn" href="https://www.linkedin.com/sharing/share-offsite/?url=${encodedReferral}" target="_blank" rel="noopener">LinkedIn</a>
     </div>
 
-    <a href="${destinationUrl}" class="cta-btn">View Live Waitlist &rarr;</a>
+    ${founderRedirectUrl ? `
+      <a href="${founderRedirectUrl}" class="return-btn">Return to ${result.campaignName} &rarr;</a>
+    ` : ''}
 
     <div class="brand-footer">
-      Powered by <strong>QueueJump</strong> ⚡ &bull; <a href="${env.APP_URL}" target="_blank">Launch a viral waitlist</a>
+      Powered by <a href="${baseUrl}" target="_blank">QueueJump</a> &bull; Viral Referral Engine
     </div>
   </div>
 
   <script>
     function copyReferral() {
-      const input = document.getElementById("refLink");
-      input.select();
-      navigator.clipboard.writeText(input.value).then(() => {
-        const btn = document.getElementById("copyBtn");
+      var input = document.getElementById("refLink");
+      var btn = document.getElementById("copyBtn");
+      var text = input.value;
+
+      function showSuccess() {
         btn.textContent = "Copied!";
         btn.style.background = "#10B981";
-        btn.style.color = "#000000";
-        setTimeout(() => {
+        setTimeout(function() {
           btn.textContent = "Copy";
-          btn.style.background = "#272730";
-          btn.style.color = "#FFFFFF";
+          btn.style.background = "#0A0A0A";
         }, 2000);
-      });
+      }
+
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(showSuccess).catch(function() {
+          fallbackCopy();
+        });
+      } else {
+        fallbackCopy();
+      }
+
+      function fallbackCopy() {
+        input.focus();
+        input.select();
+        try {
+          var ok = document.execCommand("copy");
+          if (ok) showSuccess();
+        } catch (e) {
+          prompt("Copy your referral link:", text);
+        }
+      }
     }
   </script>
 </body>
@@ -155,19 +319,52 @@ export async function handleVerifyEmail(req: Request, res: Response, next: NextF
   } catch (err: any) {
     const isBrowserHtml = req.method === "GET" && req.accepts("html");
     if (isBrowserHtml) {
+      const baseUrl = (env.APP_URL || "https://queuejump.arpitverma.me").replace(/\/+$/, "");
       const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Verification - QueueJump</title>
+  <link rel="icon" type="image/svg+xml" href="${baseUrl}/icon.svg">
   <style>
-    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0A0A0C; color: #EDEDED; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
-    .card { background: #131318; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 36px 28px; max-width: 440px; width: 100%; text-align: center; }
-    .icon { width: 52px; height: 52px; border-radius: 50%; background: rgba(239,68,68,0.12); color: #EF4444; display: inline-flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 18px; border: 1px solid rgba(239,68,68,0.25); }
-    h1 { font-size: 20px; font-weight: 700; color: #FFFFFF; margin: 0 0 8px 0; }
-    p { font-size: 13px; color: #A1A1AA; line-height: 1.5; margin: 0 0 24px 0; }
-    .btn { display: inline-block; background: rgba(255,255,255,0.08); color: #EDEDED; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #FAFAFA;
+      color: #0A0A0A;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .card {
+      background: #FFFFFF;
+      border: 1px solid #E5E7EB;
+      border-radius: 16px;
+      padding: 36px 28px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+    .icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.1);
+      color: #EF4444;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+    h1 { font-size: 18px; font-weight: 700; color: #0A0A0A; margin: 0 0 8px 0; }
+    p { font-size: 13px; color: #52525B; line-height: 1.5; margin: 0 0 20px 0; }
+    .btn { display: inline-block; background: #0A0A0A; color: #FFFFFF; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -175,7 +372,7 @@ export async function handleVerifyEmail(req: Request, res: Response, next: NextF
     <div class="icon">&#9888;</div>
     <h1>Already Verified or Expired</h1>
     <p>${err.message || "This confirmation link is invalid or has already been used."}</p>
-    <a href="${env.APP_URL}" class="btn">Return to QueueJump</a>
+    <a href="${baseUrl}" class="btn">Return to QueueJump</a>
   </div>
 </body>
 </html>`;

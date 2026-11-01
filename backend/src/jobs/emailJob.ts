@@ -33,103 +33,73 @@ export async function dispatchEmail(data: EmailJobData) {
 
 function getEmailHtml(data: EmailJobData): string {
   const { type, variables } = data;
-  const appUrl = env.APP_URL || "https://queuejump.arpitverma.me";
+  const appUrl = (env.APP_URL || "https://queuejump.arpitverma.me").replace(/\/+$/, "");
   const campaignName = variables.campaignName || "Priority Access";
 
   if (type === "verification") {
-    return `
-<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Confirm your spot for ${campaignName}</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #0A0A0C; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #EDEDED;">
-  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #0A0A0C; padding: 48px 16px;">
+<body style="margin: 0; padding: 0; background-color: #F8F9FA; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #18181B;">
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #F8F9FA; padding: 40px 16px;">
     <tr>
       <td align="center">
         <!-- Main Card Container -->
-        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 500px; background-color: #121217; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; overflow: hidden; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);">
-          <!-- Header Brand Bar -->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 480px; background-color: #FFFFFF; border: 1px solid #E4E4E7; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);">
+          <!-- Brand Header -->
           <tr>
-            <td style="padding: 28px 32px 0 32px; text-align: left;">
-              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                <tr>
-                  <td>
-                    <span style="display: inline-block; background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.25); color: #60A5FA; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 4px 10px; border-radius: 20px;">
-                      Priority Waitlist
-                    </span>
-                  </td>
-                  <td align="right">
-                    <span style="font-size: 11px; color: #71717A; font-weight: 600; letter-spacing: 0.04em;">
-                      ⚡ QueueJump
-                    </span>
-                  </td>
-                </tr>
-              </table>
+            <td style="padding: 28px 32px 0 32px;">
+              <span style="font-size: 15px; font-weight: 700; color: #0A0A0A; letter-spacing: -0.015em;">
+                Queue<span style="color: #71717A; font-weight: 400;">Jump</span>
+              </span>
             </td>
           </tr>
 
-          <!-- Main Content -->
+          <!-- Content -->
           <tr>
-            <td style="padding: 24px 32px 0 32px; text-align: left;">
-              <h1 style="margin: 0 0 12px 0; font-size: 24px; font-weight: 700; line-height: 1.3; color: #FFFFFF; letter-spacing: -0.02em;">
-                Confirm your spot for <span style="color: #60A5FA;">${campaignName}</span>
+            <td style="padding: 24px 32px 0 32px;">
+              <h1 style="margin: 0 0 10px 0; font-size: 20px; font-weight: 700; color: #0A0A0A; letter-spacing: -0.02em;">
+                Confirm your spot for ${campaignName}
               </h1>
-              <p style="margin: 0 0 24px 0; font-size: 14px; line-height: 1.6; color: #A1A1AA;">
-                You're one step away from securing your position in the priority queue. Click the button below to confirm your email, lock in your rank, and unlock your unique referral link to jump ahead of others.
+              <p style="margin: 0 0 24px 0; font-size: 14px; line-height: 1.55; color: #52525B;">
+                Please click the button below to verify your email and secure your position in line.
               </p>
 
-              <!-- CTA Button -->
-              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 28px;">
+              <!-- Confirm Button -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
                 <tr>
-                  <td align="center">
-                    <a href="${variables.verifyUrl}" style="display: block; width: 100%; box-sizing: border-box; background: #FFFFFF; color: #0A0A0C; font-size: 14px; font-weight: 700; text-align: center; text-decoration: none; padding: 14px 24px; border-radius: 10px; box-shadow: 0 4px 14px rgba(255, 255, 255, 0.12);">
-                      Confirm My Spot &rarr;
+                  <td>
+                    <a href="${variables.verifyUrl}" style="display: inline-block; background-color: #0A0A0A; color: #FFFFFF; font-size: 14px; font-weight: 600; text-align: center; text-decoration: none; padding: 12px 24px; border-radius: 8px;">
+                      Confirm Email &rarr;
                     </a>
                   </td>
                 </tr>
               </table>
 
-              <!-- Viral Loop Explanation Box -->
-              <div style="background-color: #171720; border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 10px; padding: 14px 16px; margin-bottom: 28px;">
-                <div style="font-size: 12px; font-weight: 600; color: #E4E4E7; margin-bottom: 4px;">
-                  🚀 How to jump ahead in line:
-                </div>
-                <div style="font-size: 12px; color: #A1A1AA; line-height: 1.5;">
-                  Once verified, share your personal invite link. Every friend who joins through your link bumps you forward in the queue.
-                </div>
-              </div>
-
               <!-- Fallback Direct URL -->
-              <p style="font-size: 11px; color: #52525B; line-height: 1.5; margin: 0 0 28px 0; word-break: break-all;">
-                If the button above does not work, copy and paste this link into your browser:<br/>
-                <a href="${variables.verifyUrl}" style="color: #71717A; text-decoration: underline;">${variables.verifyUrl}</a>
+              <p style="font-size: 12px; color: #71717A; line-height: 1.5; margin: 0 0 28px 0; word-break: break-all;">
+                If the button doesn't work, copy and paste this link into your browser:<br/>
+                <a href="${variables.verifyUrl}" style="color: #10B981; text-decoration: underline;">${variables.verifyUrl}</a>
               </p>
             </td>
           </tr>
 
-          <!-- Viral Growth Footer (Acquisition Engine for QueueJump) -->
+          <!-- Minimal Footer (QueueJump organic growth link) -->
           <tr>
-            <td style="padding: 24px 32px 32px 32px; background-color: #0E0E12; border-top: 1px solid rgba(255, 255, 255, 0.06); text-align: center;">
-              <p style="margin: 0 0 8px 0; font-size: 11px; font-weight: 700; color: #71717A; text-transform: uppercase; letter-spacing: 0.08em;">
-                Powered by QueueJump
+            <td style="padding: 18px 32px 24px 32px; background-color: #FAFAFA; border-top: 1px solid #F4F4F5; text-align: left;">
+              <p style="margin: 0 0 4px 0; font-size: 11px; color: #71717A;">
+                Powered by <a href="${appUrl}" style="color: #10B981; text-decoration: none; font-weight: 600;">QueueJump</a> &bull; Turn waitlists into viral loops
               </p>
-              <p style="margin: 0 0 14px 0; font-size: 12px; color: #A1A1AA; line-height: 1.5;">
-                Building a startup or product? Turn your cold signups into viral referral loops in under 2 minutes.
+              <p style="margin: 0; font-size: 11px; color: #A1A1AA;">
+                If you did not request this, you can safely ignore this email.
               </p>
-              <a href="${appUrl}" style="display: inline-block; font-size: 12px; font-weight: 600; color: #60A5FA; text-decoration: none; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.25); padding: 6px 14px; border-radius: 6px;">
-                Launch Your Viral Waitlist Free &rarr;
-              </a>
             </td>
           </tr>
         </table>
-
-        <!-- Small Unsubscribe / Notice -->
-        <p style="margin: 20px 0 0 0; font-size: 11px; color: #52525B; text-align: center;">
-          If you did not request to join ${campaignName}, you can safely disregard this email.
-        </p>
       </td>
     </tr>
   </table>
@@ -138,44 +108,38 @@ function getEmailHtml(data: EmailJobData): string {
   }
 
   // Milestone Unlocked Email
-  return `
-<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Reward Unlocked - ${campaignName}</title>
+  <title>Reward Unlocked for ${campaignName}</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #0A0A0C; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #EDEDED;">
-  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #0A0A0C; padding: 48px 16px;">
+<body style="margin: 0; padding: 0; background-color: #F8F9FA; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #18181B;">
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #F8F9FA; padding: 40px 16px;">
     <tr>
       <td align="center">
-        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 500px; background-color: #121217; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; overflow: hidden; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);">
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 480px; background-color: #FFFFFF; border: 1px solid #E4E4E7; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);">
           <tr>
-            <td style="padding: 28px 32px 0 32px; text-align: left;">
-              <span style="display: inline-block; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.25); color: #34D399; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 4px 10px; border-radius: 20px;">
-                🎉 Milestone Unlocked
+            <td style="padding: 28px 32px 0 32px;">
+              <span style="font-size: 15px; font-weight: 700; color: #0A0A0A;">
+                Queue<span style="color: #71717A; font-weight: 400;">Jump</span>
               </span>
             </td>
           </tr>
           <tr>
-            <td style="padding: 20px 32px 28px 32px; text-align: left;">
-              <h1 style="margin: 0 0 12px 0; font-size: 24px; font-weight: 700; color: #FFFFFF; letter-spacing: -0.02em;">
-                You earned: <span style="color: #34D399;">${variables.reward}</span>
+            <td style="padding: 20px 32px 28px 32px;">
+              <h1 style="margin: 0 0 10px 0; font-size: 20px; font-weight: 700; color: #0A0A0A;">
+                You unlocked: <span style="color: #10B981;">${variables.reward}</span>
               </h1>
-              <p style="margin: 0 0 20px 0; font-size: 14px; line-height: 1.6; color: #A1A1AA;">
-                Congratulations! Thanks to your <strong>${variables.referrals} verified referrals</strong> on <strong>${campaignName}</strong>, you have officially unlocked this exclusive reward.
+              <p style="margin: 0 0 16px 0; font-size: 14px; line-height: 1.55; color: #52525B;">
+                Thanks to your <strong>${variables.referrals} referrals</strong> on <strong>${campaignName}</strong>, you have earned this perk.
               </p>
-              <div style="background-color: #171720; border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 10px; padding: 14px 16px;">
-                <div style="font-size: 12px; color: #A1A1AA; line-height: 1.5;">
-                  Keep inviting friends to unlock even higher tiers and reach the front of the queue!
-                </div>
-              </div>
             </td>
           </tr>
           <tr>
-            <td style="padding: 20px 32px; background-color: #0E0E12; border-top: 1px solid rgba(255, 255, 255, 0.06); text-align: center;">
-              <span style="font-size: 11px; color: #71717A;">Powered by QueueJump ⚡</span>
+            <td style="padding: 16px 32px; background-color: #FAFAFA; border-top: 1px solid #F4F4F5; text-align: left;">
+              <span style="font-size: 11px; color: #71717A;">Powered by <a href="${appUrl}" style="color: #10B981; text-decoration: none; font-weight: 600;">QueueJump</a></span>
             </td>
           </tr>
         </table>

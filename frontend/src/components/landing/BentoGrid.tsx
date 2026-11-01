@@ -45,7 +45,7 @@ export function BentoGrid() {
               </div>
               <div className="flex items-center justify-between p-2 rounded-lg bg-[#F7F7F8] border border-black/[0.04]">
                 <span className="text-[#737373]">5 invites</span>
-                <span className="text-[#0A0A0A] font-medium">Pro plan — 6 months free</span>
+                <span className="text-[#0A0A0A] font-medium">Pro plan: 6 months free</span>
               </div>
               <div className="flex items-center justify-between p-2 rounded-lg bg-[#F7F7F8] border border-black/[0.04] opacity-50">
                 <span className="text-[#A1A1A1]">10 invites</span>
