@@ -71,6 +71,12 @@ vi.mock("../src/config/db", () => ({
       }),
     },
     participant: {
+      create: vi.fn().mockImplementation(({ data }) => {
+        const id = `part_${Date.now()}`;
+        const rec = { id, verifiedReferrals: 0, status: "VERIFIED", ...data };
+        participantsDb.set(id, rec);
+        return Promise.resolve(rec);
+      }),
       findUnique: vi.fn().mockImplementation(({ where }) => {
         if (where.referralCode) {
           for (const p of participantsDb.values()) {

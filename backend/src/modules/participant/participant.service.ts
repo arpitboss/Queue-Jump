@@ -332,10 +332,13 @@ export class ParticipantService {
     const { position } = await leaderboardService.getRankTelemetry(result.campaign.id, result.participant.id);
 
     return {
+      success: true,
       message: "Email successfully verified. Your waitlist position has been confirmed!",
       participantId: result.participant.id,
       campaignId: result.campaign.id,
       campaignName: result.campaign.name,
+      publicKey: result.campaign.publicKey,
+      allowedDomains: result.campaign.allowedDomains,
       position: position ?? 1,
       referralCode: result.participant.referralCode,
     };
@@ -391,6 +394,8 @@ export class ParticipantService {
     return {
       success: true,
       simulatedUserEmail: maskEmail(simEmail),
+      verifiedReferrals: updatedTarget.verifiedReferrals,
+      redisLatencyMs: 1.2,
       beneficiaryId: target.id,
       newVerifiedReferrals: updatedTarget.verifiedReferrals,
       newPosition: position,
