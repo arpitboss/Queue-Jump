@@ -10,18 +10,18 @@ export function HeroSection() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         {/* Main headline block */}
         <div className="text-center max-w-2xl mx-auto mb-10">
-          <div className="flex flex-col items-center justify-center gap-2 mb-6">
+          <div className="flex items-center justify-center mb-6">
             <a
               href="https://peerlist.io/arpitboss_001/project/queuejump"
               target="_blank"
               rel="noreferrer"
-              className="inline-block hover:opacity-95 transition-transform hover:-translate-y-0.5 shadow-sm rounded-xl overflow-hidden"
+              className="inline-block hover:opacity-85 transition-opacity duration-200 rounded-xl overflow-hidden border border-black/[0.08] shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
               title="Support QueueJump on Peerlist Launchpad"
             >
               <img
                 src="https://peerlist.io/api/v1/projects/embed/PRJHA9EK9AG6KDMR9HJOAK7PONRGAB?showUpvote=true&theme=light"
-                alt="QueueJump"
-                style={{ width: "auto", height: "64px" }}
+                alt="QueueJump on Peerlist"
+                style={{ width: "auto", height: "52px" }}
               />
             </a>
           </div>

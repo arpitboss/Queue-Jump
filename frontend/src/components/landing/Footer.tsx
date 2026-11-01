@@ -9,22 +9,7 @@ export function Footer() {
       {/* Top Section: Logo & Links */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-12">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <BrandLogo />
-            <a
-              href="https://peerlist.io/arpitboss_001/project/queuejump"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-block hover:opacity-90 transition"
-              title="Support QueueJump on Peerlist"
-            >
-              <img
-                src="https://peerlist.io/api/v1/projects/embed/PRJHA9EK9AG6KDMR9HJOAK7PONRGAB?showUpvote=true&theme=light"
-                alt="QueueJump"
-                style={{ width: "auto", height: "46px" }}
-              />
-            </a>
-          </div>
+          <BrandLogo />
 
           <div className="flex flex-wrap items-center gap-6 text-[13px] text-[#737373]">
             <a href="https://github.com/arpitboss/Queue-Jump" target="_blank" rel="noopener noreferrer" className="hover:text-[#0A0A0A] transition">

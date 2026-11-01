@@ -30,6 +30,21 @@ export function CtaSection() {
             API Documentation
           </a>
         </div>
+        <div className="pt-8 flex justify-center">
+          <a
+            href="https://peerlist.io/arpitboss_001/project/queuejump"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-block hover:opacity-85 transition-opacity duration-200 rounded-xl overflow-hidden border border-black/[0.08] shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
+            title="Support QueueJump on Peerlist"
+          >
+            <img
+              src="https://peerlist.io/api/v1/projects/embed/PRJHA9EK9AG6KDMR9HJOAK7PONRGAB?showUpvote=true&theme=light"
+              alt="QueueJump on Peerlist"
+              style={{ width: "auto", height: "52px" }}
+            />
+          </a>
+        </div>
       </div>
     </section>
   );

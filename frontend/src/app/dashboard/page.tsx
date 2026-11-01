@@ -41,6 +41,7 @@ export default function DashboardPage() {
   const [newCampaignName, setNewCampaignName] = useState("");
   const [newBonusHours, setNewBonusHours] = useState(24);
   const [newWebhookUrl, setNewWebhookUrl] = useState("");
+  const [newRequireVerification, setNewRequireVerification] = useState(false);
   const [creatingCampaign, setCreatingCampaign] = useState(false);
 
   const selectedCampaign = campaigns.find((c) => c.id === selectedCampaignId) || campaigns[0];
@@ -157,6 +158,7 @@ export default function DashboardPage() {
           name: newCampaignName.trim(),
           referralBonusSec: newBonusHours * 3600,
           webhookUrl: newWebhookUrl.trim() || null,
+          requireEmailVerification: newRequireVerification,
           milestones: [
             { count: 3, reward: "Early Beta Access" },
             { count: 10, reward: "Free Pro Account for 1 Year" },
@@ -167,6 +169,7 @@ export default function DashboardPage() {
       setShowCreateModal(false);
       setNewCampaignName("");
       setNewWebhookUrl("");
+      setNewRequireVerification(false);
       await loadData();
       setSelectedCampaignId(res.campaign.id);
     } catch (err: any) {
@@ -996,6 +999,25 @@ export default function DashboardPage() {
                   min={1}
                   className="w-full bg-[#F7F7F8] border border-black/[0.08] focus:border-[#0A0A0A] focus:bg-white rounded-lg px-3 py-2 text-[#0A0A0A] outline-none"
                 />
+              </div>
+
+              {/* Double Opt-In Email Verification Toggle */}
+              <div className="bg-[#F7F7F8] border border-black/[0.08] rounded-xl p-3 flex items-start gap-3 select-none">
+                <input
+                  type="checkbox"
+                  id="require-email-verification"
+                  checked={newRequireVerification}
+                  onChange={(e) => setNewRequireVerification(e.target.checked)}
+                  className="mt-0.5 rounded border-black/20 text-[#0A0A0A] cursor-pointer"
+                />
+                <label htmlFor="require-email-verification" className="cursor-pointer">
+                  <span className="font-semibold text-[#0A0A0A] block text-xs">
+                    Require Email Verification (Double Opt-In)
+                  </span>
+                  <span className="text-[#737373] text-[11px] block leading-relaxed mt-0.5">
+                    Sends an email confirmation link via Resend. Referrers only jump the queue once the new subscriber confirms their email.
+                  </span>
+                </label>
               </div>
 
               <div>
