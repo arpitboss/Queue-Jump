@@ -458,7 +458,13 @@
             <h3 class="qj-title">You're on the list!</h3>
             <p class="qj-subtitle">Refer friends to jump ahead and unlock priority access.</p>
           </div>
-          <div class="qj-position-box">
+          ${data.status === "PENDING" ? `
+          <div class="qj-pending-banner" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 10px; padding: 12px; margin-bottom: 14px; text-align: left; font-size: 12px; color: #FBBF24;">
+            <div style="font-weight: 600; margin-bottom: 2px;">📧 Check Your Inbox!</div>
+            <div style="font-size: 11px; color: #D1D5DB; line-height: 1.4;">We sent a confirmation link to your email. Click it to confirm your spot and activate your referrals.</div>
+          </div>
+        ` : ''}
+        <div class="qj-position-box">
             <div class="qj-position-label">Current Queue Position</div>
             <div class="qj-position-num">#${data.position}</div>
             <div class="qj-stats-row">

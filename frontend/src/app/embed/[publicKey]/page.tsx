@@ -121,6 +121,22 @@ function EmbedContent() {
         </form>
       ) : (
         <div className="space-y-5 text-center">
+          {participant.status === "PENDING" && (
+            <div className={`p-3.5 rounded-xl border text-left flex items-start gap-3 ${
+              isDark
+                ? "bg-amber-500/10 border-amber-500/20 text-amber-200"
+                : "bg-amber-50 border-amber-200 text-amber-900"
+            }`}>
+              <span className="w-2 h-2 rounded-full bg-amber-400 mt-1.5 shrink-0 animate-pulse" />
+              <div className="text-xs">
+                <span className="font-semibold block">Confirmation Email Sent!</span>
+                <span className={`text-[11px] block mt-0.5 leading-relaxed ${isDark ? "text-zinc-300" : "text-amber-800"}`}>
+                  Please check your inbox and click the verification link to confirm your spot and activate your referrals.
+                </span>
+              </div>
+            </div>
+          )}
+
           <div
             className={`border rounded-xl p-5 ${
               isDark ? "bg-[#14141B] border-white/[0.08]" : "bg-[#F7F7F8] border-black/[0.06]"
