@@ -90,7 +90,7 @@ export function startEmailWorker() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "QueueJump <noreply@queuejump.dev>",
+          from: env.EMAIL_FROM || "QueueJump <noreply@arpitverma.me>",
           to: [to],
           subject,
           html: htmlContent,

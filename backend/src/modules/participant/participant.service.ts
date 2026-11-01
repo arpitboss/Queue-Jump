@@ -316,10 +316,15 @@ export class ParticipantService {
       }
     }
 
+    const { position } = await leaderboardService.getRankTelemetry(result.campaign.id, result.participant.id);
+
     return {
       message: "Email successfully verified. Your waitlist position has been confirmed!",
       participantId: result.participant.id,
       campaignId: result.campaign.id,
+      campaignName: result.campaign.name,
+      position: position ?? 1,
+      referralCode: result.participant.referralCode,
     };
   }
 

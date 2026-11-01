@@ -3,6 +3,7 @@ import { env } from "./config/env";
 import { prisma } from "./config/db";
 import { redis } from "./config/redis";
 import { loadDisposableDomains } from "./modules/fraud/disposableDomainService";
+import { startEmailWorker } from "./jobs/emailJob";
 
 process.on("unhandledRejection", (reason: any) => {
   console.warn("Unhandled promise rejection:", reason?.message || reason);
@@ -23,6 +24,14 @@ async function bootstrap() {
   });
 
   // Load disposable email domains blocklist asynchronously without blocking port listening
+  // Start BullMQ email worker for asynchronous double opt-in processing
+  try {
+    startEmailWorker();
+    console.log("BullMQ email worker initialized.");
+  } catch (err: any) {
+    console.warn("Could not start email worker:", err.message);
+  }
+
   loadDisposableDomains()
     .then((count) => console.log(`Loaded ${count} disposable email domains into blocklist.`))
     .catch((err) => console.warn("Failed to load disposable domains blocklist:", err.message));

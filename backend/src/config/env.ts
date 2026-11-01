@@ -26,6 +26,7 @@ const envSchema = z.object({
 
   // Resend (optional in dev - emails will be logged to console)
   RESEND_API_KEY: z.string().optional(),
+  EMAIL_FROM: z.string().default("QueueJump <noreply@arpitverma.me>"),
 
   // URLs
   APP_URL: z.string().url().default("http://localhost:3000"),

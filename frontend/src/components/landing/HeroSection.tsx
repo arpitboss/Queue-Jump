@@ -10,9 +10,20 @@ export function HeroSection() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         {/* Main headline block */}
         <div className="text-center max-w-2xl mx-auto mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-black/[0.08] shadow-[0_1px_2px_rgba(0,0,0,0.03)] text-[12px] font-medium text-[#737373] mb-5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#14804A]" />
-            Waitlist referral engine
+          <div className="flex flex-col items-center justify-center gap-2 mb-6">
+            <a
+              href="https://peerlist.io/arpitboss_001/project/queuejump"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-block hover:opacity-95 transition-transform hover:-translate-y-0.5 shadow-sm rounded-xl overflow-hidden"
+              title="Support QueueJump on Peerlist Launchpad"
+            >
+              <img
+                src="https://peerlist.io/api/v1/projects/embed/PRJHA9EK9AG6KDMR9HJOAK7PONRGAB?showUpvote=true&theme=light"
+                alt="QueueJump"
+                style={{ width: "auto", height: "64px" }}
+              />
+            </a>
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-[44px] font-semibold tracking-[-0.025em] text-[#0A0A0A] leading-[1.16] mb-4">
