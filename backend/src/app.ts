@@ -7,6 +7,7 @@ import { healthRouter } from "./modules/health/health.router";
 import { tenantRouter } from "./modules/tenant/tenant.router";
 import { campaignRouter } from "./modules/campaign/campaign.router";
 import { participantRouter } from "./modules/participant/participant.router";
+import { telemetryRouter } from "./modules/telemetry/telemetry.router";
 import { swaggerRouter } from "./docs/swagger";
 import { errorHandler } from "./middlewares/errorHandler";
 import { NotFoundError } from "./utils/errors";
@@ -31,12 +32,33 @@ app.use(
 );
 
 // CORS configuration
+const trustedOrigins = [
+  env.APP_URL,
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "https://queuejump.arpitverma.me",
+];
+
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
       if (env.NODE_ENV !== "production") return callback(null, true);
-      if (origin === env.APP_URL) return callback(null, true);
+
+      try {
+        const u = new URL(origin);
+        const host = u.hostname.toLowerCase();
+        const isTrusted =
+          trustedOrigins.some((t) => t && (origin === t || u.origin === t)) ||
+          host.endsWith("arpitverma.me") ||
+          host.endsWith("onrender.com");
+
+        if (isTrusted) {
+          return callback(null, true);
+        }
+      } catch {}
+
+      // Public embeddable waitlist & widget requests from client sites are permitted
       return callback(null, true);
     },
     credentials: true,
@@ -68,6 +90,7 @@ app.get("/", (_req: Request, res: Response) => {
 // Routes
 app.use("/api/docs", swaggerRouter);
 app.use("/api/v1/health", healthRouter);
+app.use("/api/v1/telemetry", telemetryRouter);
 app.use("/api/v1/tenants", tenantRouter);
 app.use("/api/v1/campaigns", campaignRouter);
 app.use("/api/v1/waitlist", participantRouter);

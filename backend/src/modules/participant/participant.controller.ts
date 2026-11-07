@@ -238,7 +238,7 @@ export async function handleVerifyEmail(req: Request, res: Response, next: NextF
       font-weight: 600;
     }
   </style>
-</head>
+  <script>\n    if (window.history && window.history.replaceState) {\n      var cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;\n      window.history.replaceState({}, document.title, cleanUrl);\n    }\n  </script>\n</head>
 <body>
   <div class="card">
     <div class="check-icon">&#10003;</div>

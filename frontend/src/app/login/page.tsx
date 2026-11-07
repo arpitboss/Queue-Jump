@@ -23,12 +23,15 @@ export default function LoginPage() {
     const body = isRegister ? { name, email, password } : { email, password };
 
     try {
-      const data = await apiRequest<{ accessToken: string }>(endpoint, {
+      const data = await apiRequest<{ accessToken: string; refreshToken?: string }>(endpoint, {
         method: "POST",
         body: JSON.stringify(body),
       });
 
       localStorage.setItem("queuejump_token", data.accessToken);
+      if (data.refreshToken) {
+        localStorage.setItem("queuejump_refresh_token", data.refreshToken);
+      }
       router.push("/dashboard");
     } catch (err: any) {
       setError(err.message || "Authentication failed. Check your credentials.");
@@ -41,15 +44,18 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
     try {
-      const data = await apiRequest<{ accessToken: string }>("/api/v1/tenants/login", {
+      const data = await apiRequest<{ accessToken: string; refreshToken?: string }>("/api/v1/tenants/login", {
         method: "POST",
         body: JSON.stringify({ email: "demo@queuejump.dev", password: "demopassword123" }),
       });
       localStorage.setItem("queuejump_token", data.accessToken);
+      if (data.refreshToken) {
+        localStorage.setItem("queuejump_refresh_token", data.refreshToken);
+      }
       router.push("/dashboard");
     } catch {
       try {
-        const regData = await apiRequest<{ accessToken: string }>("/api/v1/tenants/register", {
+        const regData = await apiRequest<{ accessToken: string; refreshToken?: string }>("/api/v1/tenants/register", {
           method: "POST",
           body: JSON.stringify({
             name: "Demo Founder",
@@ -58,6 +64,9 @@ export default function LoginPage() {
           }),
         });
         localStorage.setItem("queuejump_token", regData.accessToken);
+        if (regData.refreshToken) {
+          localStorage.setItem("queuejump_refresh_token", regData.refreshToken);
+        }
         router.push("/dashboard");
       } catch (err: any) {
         setError(err.message || "Failed to log in as demo.");

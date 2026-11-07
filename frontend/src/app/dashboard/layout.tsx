@@ -5,21 +5,34 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, LogOut } from "lucide-react";
 import { BrandLogo } from "@/components/ui/BrandLogo";
+import { apiRequest, attemptSilentRefresh } from "@/lib/api";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    const token = localStorage.getItem("queuejump_token");
-    if (!token) {
-      router.push("/login");
+    async function checkAuth() {
+      const token = localStorage.getItem("queuejump_token");
+      if (!token) {
+        // Attempt silent refresh before bouncing to login
+        const refreshed = await attemptSilentRefresh();
+        if (!refreshed) {
+          router.push("/login");
+          return;
+        }
+      }
+      setMounted(true);
     }
+    checkAuth();
   }, [router]);
 
-  function handleLogout() {
+  async function handleLogout() {
+    try {
+      await apiRequest("/api/v1/tenants/logout", { method: "POST" });
+    } catch {}
     localStorage.removeItem("queuejump_token");
+    localStorage.removeItem("queuejump_refresh_token");
     router.push("/login");
   }
 

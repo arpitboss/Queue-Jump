@@ -67,25 +67,50 @@ export async function apiKeyAuth(
       }
     }
 
-    // 3. Domain Whitelist Check
+    // 3. Domain Whitelist Check (Strict host matching without substring bypass)
     if (campaign.allowedDomains) {
-      const origin = (req.headers.origin as string || "").toLowerCase();
-      const referer = (req.headers.referer as string || "").toLowerCase();
-      if (origin || referer) {
-        const allowedList = campaign.allowedDomains
-          .split(",")
-          .map((d: string) => d.trim().toLowerCase())
-          .filter(Boolean);
+      const allowedList = campaign.allowedDomains
+        .split(",")
+        .map((d: string) => d.trim().toLowerCase())
+        .filter(Boolean);
 
-        const isAllowed = allowedList.some((allowed: string) => {
-          return origin.includes(allowed) || referer.includes(allowed) || allowed === "*";
-        });
+      const hasWildcard = allowedList.includes("*");
 
-        if (!isAllowed) {
-          throw new UnauthorizedError(
-            `Domain not authorized for this campaign key. Allowed: ${campaign.allowedDomains}`,
-            "DOMAIN_NOT_ALLOWED"
-          );
+      if (!hasWildcard) {
+        const origin = (req.headers.origin as string) || "";
+        const referer = (req.headers.referer as string) || "";
+
+        if (!origin && !referer) {
+          if (process.env.NODE_ENV === "production") {
+            throw new UnauthorizedError(
+              "Missing Origin or Referer header for domain-restricted campaign key.",
+              "DOMAIN_HEADER_MISSING"
+            );
+          }
+        } else {
+          const extractHost = (val: string): string => {
+            try {
+              return new URL(val).hostname.toLowerCase();
+            } catch {
+              return val.replace(/^https?:\/\//i, "").split("/")[0].split(":")[0].toLowerCase();
+            }
+          };
+
+          const originHost = origin ? extractHost(origin) : "";
+          const refererHost = referer ? extractHost(referer) : "";
+
+          const isAllowed = allowedList.some((allowed: string) => {
+            const cleanAllowed = allowed.replace(/^https?:\/\//i, "").split("/")[0].toLowerCase();
+            const matches = (h: string) => h === cleanAllowed || h.endsWith("." + cleanAllowed);
+            return (originHost && matches(originHost)) || (refererHost && matches(refererHost));
+          });
+
+          if (!isAllowed) {
+            throw new UnauthorizedError(
+              `Domain not authorized for this campaign key. Allowed: ${campaign.allowedDomains}`,
+              "DOMAIN_NOT_ALLOWED"
+            );
+          }
         }
       }
     }

@@ -11,7 +11,7 @@ const NOUNS = [
 ];
 
 export function generateReferralCode(customPrefix?: string): string {
-  const randomSuffix = crypto.randomBytes(3).toString("hex").slice(0, 4);
+  const randomSuffix = crypto.randomBytes(4).toString("hex");
 
   if (customPrefix) {
     const cleanPrefix = customPrefix

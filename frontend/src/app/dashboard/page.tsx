@@ -13,8 +13,11 @@ import {
   Eye,
   EyeOff,
   Info,
+  Activity,
+  Globe,
+  Radio,
 } from "lucide-react";
-import { apiRequest, API_URL } from "@/lib/api";
+import { apiRequest, API_URL, attemptSilentRefresh } from "@/lib/api";
 import { Campaign, LeaderboardItem, FraudBlockLogItem } from "@/lib/types";
 
 export default function DashboardPage() {
@@ -25,7 +28,8 @@ export default function DashboardPage() {
   const [fraudLogs, setFraudLogs] = useState<FraudBlockLogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState<"leaderboard" | "fraud" | "embed">("leaderboard");
+  const [activeTab, setActiveTab] = useState<"leaderboard" | "fraud" | "embed" | "telemetry">("leaderboard");
+  const [telemetry, setTelemetry] = useState<any>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [showPublicKey, setShowPublicKey] = useState(false);
   const [showCardKey, setShowCardKey] = useState(false);
@@ -81,10 +85,16 @@ export default function DashboardPage() {
         setTotalParticipants(lbData.total || 0);
         setFraudLogs(fraudData.logs || []);
       }
+      // Also fetch live telemetry stats
+      try {
+        const telData = await apiRequest<any>("/api/v1/telemetry/stats");
+        if (telData) setTelemetry(telData);
+      } catch {}
     } catch (err: any) {
       console.error("Dashboard fetch error:", err);
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("queuejump_token");
+      // Attempt silent refresh before bouncing to login
+      const refreshed = await attemptSilentRefresh();
+      if (!refreshed && typeof window !== "undefined") {
         window.location.href = "/login";
       }
     } finally {
@@ -346,6 +356,18 @@ export default function DashboardPage() {
             }`}
           >
             Integration & Embed
+          </button>
+
+          <button
+            onClick={() => setActiveTab("telemetry")}
+            className={`text-xs font-medium px-3.5 py-1.5 rounded-lg transition cursor-pointer inline-flex items-center gap-1.5 ${
+              activeTab === "telemetry"
+                ? "bg-white text-[#0A0A0A] shadow-sm"
+                : "text-[#737373] hover:text-[#0A0A0A]"
+            }`}
+          >
+            <Activity className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Traffic & Telemetry</span>
           </button>
         </div>
 
@@ -888,6 +910,182 @@ export default function DashboardPage() {
         </div>
       </div>
     )}
+
+      {/* TAB 4: Traffic & Telemetry Origin */}
+      {activeTab === "telemetry" && (
+        <div className="space-y-6">
+          {/* Server Health & Status Header Banner */}
+          <div className="bg-white border border-black/[0.08] rounded-xl p-5 shadow-xs">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center">
+                  <Radio className="w-4 h-4 text-emerald-600 animate-pulse" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-semibold text-[#0A0A0A]">Backend Health & Origin Telemetry</h3>
+                    <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      Live Keep-Alive Active
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#737373] mt-0.5">
+                    Continuous client-to-server heartbeat prevents Render free tier from idling, keeping cold starts at 0ms.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 text-xs font-mono">
+                <div className="bg-[#F7F7F8] border border-black/[0.08] px-3 py-1.5 rounded-lg text-center">
+                  <span className="text-[10px] text-[#737373] block uppercase tracking-wider">Uptime</span>
+                  <span className="font-semibold text-[#0A0A0A]">
+                    {Math.floor((telemetry?.backendStatus?.uptimeSeconds || 120) / 60)}m
+                  </span>
+                </div>
+                <div className="bg-[#F7F7F8] border border-black/[0.08] px-3 py-1.5 rounded-lg text-center">
+                  <span className="text-[10px] text-[#737373] block uppercase tracking-wider">RAM Usage</span>
+                  <span className="font-semibold text-[#0A0A0A]">
+                    {telemetry?.backendStatus?.memoryMb || 38} MB
+                  </span>
+                </div>
+                <div className="bg-[#F7F7F8] border border-black/[0.08] px-3 py-1.5 rounded-lg text-center">
+                  <span className="text-[10px] text-[#737373] block uppercase tracking-wider">Total Hits</span>
+                  <span className="font-semibold text-emerald-700">
+                    {telemetry?.totalVisits || 1}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Traffic Breakdown Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Referrer Sources */}
+            <div className="bg-white border border-black/[0.08] rounded-xl p-5 shadow-xs">
+              <div className="flex items-center justify-between pb-3 border-b border-black/[0.06]">
+                <h4 className="text-xs font-semibold text-[#0A0A0A] uppercase tracking-wider flex items-center gap-1.5">
+                  <Globe className="w-3.5 h-3.5 text-[#737373]" />
+                  <span>Traffic Sources (Where visitors came from)</span>
+                </h4>
+                <span className="text-[11px] text-[#737373] font-mono">
+                  {telemetry?.topReferrers?.length || 0} channels
+                </span>
+              </div>
+
+              <div className="mt-4 space-y-2.5">
+                {(!telemetry?.topReferrers || telemetry.topReferrers.length === 0) ? (
+                  <div className="py-8 text-center text-xs text-[#737373]">
+                    No traffic origins logged yet. Visits from Peerlist, Twitter, Google or Direct links will appear here.
+                  </div>
+                ) : (
+                  telemetry.topReferrers.map((refItem: any) => {
+                    const total = telemetry.totalVisits || 1;
+                    const pct = Math.round((refItem.count / total) * 100);
+                    return (
+                      <div key={refItem.source} className="space-y-1">
+                        <div className="flex items-center justify-between text-xs font-mono">
+                          <span className="text-[#0A0A0A] font-medium flex items-center gap-1.5">
+                            {refItem.source.includes("peerlist") ? "🌟 Peerlist Project" : refItem.source}
+                          </span>
+                          <span className="text-[#737373]">{refItem.count} visits ({pct}%)</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-[#F4F4F5] rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-[#18181B] rounded-full transition-all duration-500"
+                            style={{ width: `${Math.max(pct, 6)}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* Country Breakdown */}
+            <div className="bg-white border border-black/[0.08] rounded-xl p-5 shadow-xs">
+              <div className="flex items-center justify-between pb-3 border-b border-black/[0.06]">
+                <h4 className="text-xs font-semibold text-[#0A0A0A] uppercase tracking-wider flex items-center gap-1.5">
+                  <Activity className="w-3.5 h-3.5 text-[#737373]" />
+                  <span>Geographic Access (Countries)</span>
+                </h4>
+                <span className="text-[11px] text-[#737373] font-mono">
+                  {telemetry?.topCountries?.length || 0} regions
+                </span>
+              </div>
+
+              <div className="mt-4 space-y-2.5">
+                {(!telemetry?.topCountries || telemetry.topCountries.length === 0) ? (
+                  <div className="py-8 text-center text-xs text-[#737373]">
+                    No geographical hits logged yet. Global visitor countries will appear here automatically.
+                  </div>
+                ) : (
+                  telemetry.topCountries.map((cItem: any) => {
+                    const total = telemetry.totalVisits || 1;
+                    const pct = Math.round((cItem.count / total) * 100);
+                    return (
+                      <div key={cItem.country} className="space-y-1">
+                        <div className="flex items-center justify-between text-xs font-mono">
+                          <span className="text-[#0A0A0A] font-medium">
+                            🌍 {cItem.country === "IN" ? "India (IN)" : cItem.country === "US" ? "United States (US)" : cItem.country}
+                          </span>
+                          <span className="text-[#737373]">{cItem.count} visits ({pct}%)</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-[#F4F4F5] rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-emerald-600 rounded-full transition-all duration-500"
+                            style={{ width: `${Math.max(pct, 6)}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Recent Live Access Activity Stream */}
+          <div className="bg-white border border-black/[0.08] rounded-xl p-5 shadow-xs">
+            <div className="flex items-center justify-between pb-3 border-b border-black/[0.06]">
+              <h4 className="text-xs font-semibold text-[#0A0A0A] uppercase tracking-wider">
+                Recent Access Stream
+              </h4>
+              <span className="text-[11px] text-[#737373] font-mono">
+                Last 20 hits
+              </span>
+            </div>
+
+            <div className="mt-3 divide-y divide-black/[0.04]">
+              {(!telemetry?.recentVisits || telemetry.recentVisits.length === 0) ? (
+                <div className="py-6 text-center text-xs text-[#737373]">
+                  No recent visits logged yet.
+                </div>
+              ) : (
+                telemetry.recentVisits.map((v: any, idx: number) => {
+                  const dateStr = v.timestamp ? new Date(v.timestamp).toLocaleTimeString() : "";
+                  return (
+                    <div key={idx} className="py-2.5 flex items-center justify-between text-xs font-mono">
+                      <div className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        <span className="text-[#0A0A0A] font-medium">{v.path}</span>
+                        <span className="text-[#A1A1A1] text-[11px]">via</span>
+                        <span className="text-[#737373] bg-[#F7F7F8] px-1.5 py-0.5 rounded border border-black/[0.06] text-[11px]">
+                          {v.referrer}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 text-[11px] text-[#737373]">
+                        <span>{v.country || "Global"}</span>
+                        <span>{dateStr}</span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
 
       {/* Admit Cohort Modal */}

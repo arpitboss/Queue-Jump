@@ -94,16 +94,11 @@ export class FraudService {
 
     // 5. Async Non-Blocking DNS MX verification
     // Runs in the background so slow DNS resolvers never block the user's signup response
-    setImmediate(async () => {
-      try {
-        const mxValid = await checkDomainMx(emailResult.domain);
-        if (!mxValid) {
-          await this.logFraudBlock(campaignId, rawEmail, ipAddress, "INVALID_MX");
-        }
-      } catch {
-        // Safe background catch
-      }
-    });
+    const mxValid = await checkDomainMx(emailResult.domain);
+    if (!mxValid) {
+      await this.logFraudBlock(campaignId, rawEmail, ipAddress, "INVALID_MX");
+      throw new AppError("This email domain cannot receive incoming messages. Please provide a valid active email address.", 400, "INVALID_EMAIL_DOMAIN");
+    }
 
     return {
       ...emailResult,

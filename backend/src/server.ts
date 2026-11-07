@@ -32,6 +32,16 @@ async function bootstrap() {
     console.warn("Could not start email worker:", err.message);
   }
 
+  // Self-ping heartbeat every 8 minutes to prevent Render free-tier instance from sleeping
+  const keepAliveUrl = process.env.RENDER_EXTERNAL_URL || env.API_URL;
+  if (keepAliveUrl && env.NODE_ENV === "production") {
+    setInterval(async () => {
+      try {
+        await fetch(`${keepAliveUrl}/api/v1/health`);
+      } catch {}
+    }, 8 * 60 * 1000).unref();
+  }
+
   loadDisposableDomains()
     .then((count) => console.log(`Loaded ${count} disposable email domains into blocklist.`))
     .catch((err) => console.warn("Failed to load disposable domains blocklist:", err.message));

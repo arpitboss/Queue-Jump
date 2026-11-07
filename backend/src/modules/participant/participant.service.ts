@@ -1,9 +1,11 @@
+import { performance } from "perf_hooks";
+import { redis } from "../../config/redis";
 import crypto from "crypto";
 import { prisma } from "../../config/db";
 import { leaderboardService } from "../leaderboard/leaderboard.service";
 import { fraudService } from "../fraud/fraud.service";
 import { generateReferralCode } from "../../utils/referralCode";
-import { NotFoundError, AppError } from "../../utils/errors";
+import { NotFoundError, AppError, ForbiddenError } from "../../utils/errors";
 import { dispatchWebhook } from "../../jobs/webhookJob";
 import { dispatchEmail } from "../../jobs/emailJob";
 import { env } from "../../config/env";
@@ -58,6 +60,10 @@ export class ParticipantService {
       referrerId,
     });
 
+    if (fraudResult.isSelfReferral) {
+      referrerId = null;
+    }
+
     const { canonicalEmail, localPart } = fraudResult;
 
     // Helper to format referral link attributing to the host website
@@ -88,15 +94,27 @@ export class ParticipantService {
 
       // If participant is still PENDING and re-enters their email, resend verification email
       if (existing.status === "PENDING" && existing.verificationToken) {
-        await dispatchEmail({
-          to: rawEmail,
-          type: "verification",
-          subject: `Verify your spot for ${campaign.name}`,
-          variables: {
-            verifyUrl: `${env.API_URL}/api/v1/waitlist/verify?token=${existing.verificationToken}`,
-            campaignName: campaign.name,
-          },
-        });
+        const cooldownKey = `cooldown:resend:${campaign.id}:${existing.id}`;
+        let inCooldown = false;
+        try {
+          inCooldown = (await redis.exists(cooldownKey)) === 1;
+        } catch {}
+
+        if (!inCooldown) {
+          try {
+            await redis.setex(cooldownKey, 60, "1");
+          } catch {}
+
+          await dispatchEmail({
+            to: rawEmail,
+            type: "verification",
+            subject: `Verify your spot for ${campaign.name}`,
+            variables: {
+              verifyUrl: `${env.API_URL}/api/v1/waitlist/verify?token=${existing.verificationToken}`,
+              campaignName: campaign.name,
+            },
+          });
+        }
       }
 
       return {
@@ -116,10 +134,13 @@ export class ParticipantService {
     let referralCode = generateReferralCode(localPart);
     let collision = await prisma.participant.findUnique({ where: { referralCode } });
     let attempts = 0;
-    while (collision && attempts < 3) {
+    while (collision && attempts < 5) {
       referralCode = generateReferralCode();
       collision = await prisma.participant.findUnique({ where: { referralCode } });
       attempts++;
+    }
+    if (collision) {
+      referralCode = `qj-${Date.now().toString(36)}-${crypto.randomBytes(3).toString("hex")}`;
     }
 
     const verificationToken = crypto.randomBytes(32).toString("hex");
@@ -254,6 +275,16 @@ export class ParticipantService {
         );
       }
 
+      // Check 48-hour expiration
+      const TOKEN_TTL_MS = 48 * 60 * 60 * 1000;
+      if (Date.now() - new Date(participant.joinedAt).getTime() > TOKEN_TTL_MS) {
+        throw new AppError(
+          "Verification link has expired (valid for 48 hours). Please sign up again to receive a fresh verification link.",
+          400,
+          "TOKEN_EXPIRED"
+        );
+      }
+
       // Mark verified
       const updated = await tx.participant.update({
         where: { id: participant.id },
@@ -345,6 +376,9 @@ export class ParticipantService {
   }
 
   async demoSimulateReferral(campaign: CampaignContext, referralCode?: string, ipAddress: string = "127.0.0.1") {
+    if (!campaign.isDemo) {
+      throw new ForbiddenError("Demo simulation is only permitted for demo campaigns.");
+    }
     let target = null;
     if (referralCode) {
       target = await prisma.participant.findUnique({
@@ -383,11 +417,13 @@ export class ParticipantService {
       data: { verifiedReferrals: { increment: 1 } },
     });
 
+    const redisStart = performance.now();
     await leaderboardService.jumpParticipant(
       campaign.id,
       target.id,
       campaign.referralBonusSec
     );
+    const measuredLatency = Number((performance.now() - redisStart).toFixed(2));
 
     const { position, total } = await leaderboardService.getRankTelemetry(campaign.id, target.id);
 
@@ -395,7 +431,7 @@ export class ParticipantService {
       success: true,
       simulatedUserEmail: maskEmail(simEmail),
       verifiedReferrals: updatedTarget.verifiedReferrals,
-      redisLatencyMs: 1.2,
+      redisLatencyMs: measuredLatency,
       beneficiaryId: target.id,
       newVerifiedReferrals: updatedTarget.verifiedReferrals,
       newPosition: position,

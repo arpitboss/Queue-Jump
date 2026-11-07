@@ -93,11 +93,16 @@ export class CampaignService {
       throw new ForbiddenError("You do not have access to this campaign");
     }
 
+    const maskedWebhookSecret = campaign.webhookSecret
+      ? `whsec_***${campaign.webhookSecret.slice(-4)}`
+      : null;
+
     return {
       id: campaign.id,
       name: campaign.name,
       publicKey: campaign.publicKey,
-      webhookSecret: campaign.webhookSecret,
+      webhookSecret: maskedWebhookSecret,
+      hasWebhookSecret: Boolean(campaign.webhookSecret),
       referralBonusSec: campaign.referralBonusSec,
       requireEmailVerification: campaign.requireEmailVerification,
       allowedDomains: campaign.allowedDomains,
@@ -132,7 +137,10 @@ export class CampaignService {
     });
 
     try {
-      await redis.del(`campaign:pk:${updated.publicKey}`);
+      await Promise.all([
+        redis.del(`campaign:pk:${updated.publicKey}`),
+        redis.del(`campaign:${campaignId}`),
+      ]);
     } catch {
       // Non-critical cache purge error
     }
