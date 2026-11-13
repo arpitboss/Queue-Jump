@@ -14,13 +14,50 @@
   }
 }
 
+.font-heading {
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  letter-spacing: -0.025em;
+  font-weight: 600;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-sans {
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-mono {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   overflow-x: hidden;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background-color: rgba(0, 0, 0, 0.08);
+  color: inherit;
+}
+
+pre ::selection,
+code ::selection,
+.dark-selection ::selection,
+[class*="bg-[#121215]"] ::selection,
+[class*="bg-[#0A0A0A]"] ::selection,
+.btn-vibrant-dark ::selection,
+.btn-vibrant-emerald ::selection {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  color: #FFFFFF !important;
 }
 
 /* Rich tactile button styles inspired by vibrant.design */
@@ -76,6 +113,24 @@ body {
   background: #1F1F1F;
 }
 .btn-vibrant-dark:active {
+  transform: scale(0.98);
+}
+
+.btn-vibrant-emerald {
+  background: #059669;
+  color: #FFFFFF;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 2px 6px rgba(5, 150, 105, 0.25), 0 1px 2px rgba(0, 0, 0, 0.08);
+  border-radius: 9999px;
+  transition: all 0.15s cubic-bezier(0.2, 0, 0, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-vibrant-emerald:hover {
+  background: #047857;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 4px 10px rgba(5, 150, 105, 0.32);
+}
+.btn-vibrant-emerald:active {
   transform: scale(0.98);
 }
 
@@ -224,22 +279,113 @@ body {
   animation: packetDb 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite 1.4s;
 }
 
-/* Custom sleek dark scrollbar */
+/* High-Precision Bento Vector Flow Animations */
+@keyframes vectorPacketGlide {
+  0% {
+    transform: translateX(0px);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(180px);
+    opacity: 0;
+  }
+}
+
+@keyframes scannerLineSweep {
+  0% {
+    top: 0%;
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.8;
+  }
+  85% {
+    opacity: 0.8;
+  }
+  100% {
+    top: 98%;
+    opacity: 0;
+  }
+}
+
+@keyframes progressShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+@keyframes livePingPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(1.15);
+  }
+}
+
+.animate-shimmer-sweep {
+  animation: progressShimmer 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-ping-calm {
+  animation: livePingPulse 2.4s ease-in-out infinite;
+}
+
+.texture-subtle-grid {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.065) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+@keyframes beaconSoftPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
+}
+
+.animate-vector-packet {
+  animation: vectorPacketGlide 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-scanner-sweep {
+  animation: scannerLineSweep 3.6s ease-in-out infinite;
+}
+
+.animate-beacon-soft {
+  animation: beaconSoftPulse 2.4s ease-in-out infinite;
+}
+
+/* Custom sleek dark scrollbar scoped strictly to dark code containers */
 pre::-webkit-scrollbar,
-div::-webkit-scrollbar {
+[class*="bg-[#121215]"]::-webkit-scrollbar {
   height: 6px;
   width: 6px;
 }
 pre::-webkit-scrollbar-track,
-div::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
+[class*="bg-[#121215]"]::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
 }
 pre::-webkit-scrollbar-thumb,
-div::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+[class*="bg-[#121215]"]::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
   border-radius: 9999px;
 }
 pre::-webkit-scrollbar-thumb:hover,
-div::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.35);
+[class*="bg-[#121215]"]::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }

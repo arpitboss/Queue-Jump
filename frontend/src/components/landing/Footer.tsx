@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { API_URL } from "@/lib/api";
 
@@ -18,12 +19,12 @@ export function Footer() {
             <a href={`${API_URL}/api/docs`} target="_blank" rel="noopener noreferrer" className="hover:text-[#0A0A0A] transition">
               Documentation
             </a>
-            <a href="/dashboard" className="hover:text-[#0A0A0A] transition">
+            <Link href="/dashboard" className="hover:text-[#0A0A0A] transition">
               Dashboard
-            </a>
-            <a href="/login" className="hover:text-[#0A0A0A] transition">
+            </Link>
+            <Link href="/login" className="hover:text-[#0A0A0A] transition">
               Sign In
-            </a>
+            </Link>
             <span className="text-[#A1A1A1] text-xs">
               &copy; 2026 QueueJump
             </span>

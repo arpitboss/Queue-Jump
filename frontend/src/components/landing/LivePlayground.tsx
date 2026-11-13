@@ -115,7 +115,7 @@ export function LivePlayground() {
       {/* Widget Header */}
       <div className="px-5 py-3 bg-white/70 border-b border-black/[0.05] flex items-center justify-between text-[11.5px]">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#14804A]" />
+          <span className="w-2 h-2 rounded-full bg-[#10B981]" />
           <span className="font-medium text-[#0A0A0A]">Live Widget Preview</span>
         </div>
         <span className="text-[#8C8C8C] font-mono">Demo Mode</span>
@@ -212,7 +212,7 @@ export function LivePlayground() {
                     initial={{ opacity: 0, y: -4 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
-                    className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-[12px] font-medium px-3 py-1.5 rounded-lg text-center"
+                    className="bg-emerald-500/[0.08] border border-emerald-500/20 text-emerald-800 text-[12px] font-medium px-3 py-1.5 rounded-lg text-center"
                   >
                     Friend joined! You skipped {spotsJumped} spots ahead.
                   </motion.div>
@@ -235,7 +235,7 @@ export function LivePlayground() {
                     onClick={handleCopy}
                     className="btn-vibrant-white text-[12px] font-medium px-3 py-1 shrink-0 cursor-pointer"
                   >
-                    {copied ? <Check className="w-3.5 h-3.5 text-[#14804A]" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{copied ? "Copied" : "Copy"}</span>
                   </button>
                 </div>
@@ -254,15 +254,16 @@ export function LivePlayground() {
                 </p>
               </div>
 
-              {/* Simulation test button - Rich Blue Tactile button */}
+              {/* Simulation test button - Tactile Dark button with live indicator */}
               <div className="space-y-2 pt-1">
                 <button
                   type="button"
                   onClick={handleSimulateReferral}
                   disabled={simulating}
-                  className="btn-vibrant-primary w-full text-[13.5px] font-medium py-2.5 cursor-pointer disabled:opacity-50"
+                  className="btn-vibrant-dark w-full text-[13px] font-medium py-2.5 cursor-pointer disabled:opacity-50 inline-flex items-center justify-center gap-2"
                 >
-                  {simulating ? "Simulating referral..." : "Simulate friend signup (+3 spots)"}
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  <span>{simulating ? "Simulating referral..." : "Simulate friend signup (+3 spots)"}</span>
                 </button>
 
                 <div className="text-center">

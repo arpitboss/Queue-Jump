@@ -1,19 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { Check, Copy } from "lucide-react";
+import { CodeBlock } from "@/components/ui/CodeBlock";
 import { API_URL } from "@/lib/api";
 
 export function HowItWorks() {
-  const [activeTab, setActiveTab] = useState<"widget" | "api">("widget");
-  const [copied, setCopied] = useState(false);
-
   const widgetCode = `<!-- Drop in anywhere: Webflow, Framer, Next.js, or HTML -->
 <div id="queuejump" data-key="pk_live_your_campaign_key" data-theme="dark"></div>
-<script src="${API_URL}/widget.js" async></script>`;
+<script src="https://queuejump.arpitverma.me/widget.js" async></script>`;
 
   const apiCode = `// Or submit from your custom form or mobile app
-const res = await fetch("${API_URL}/api/v1/waitlist/join", {
+const res = await fetch("https://queuejump.arpitverma.me/api/v1/waitlist/join", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -27,13 +23,10 @@ const res = await fetch("${API_URL}/api/v1/waitlist/join", {
 
 const { position, referralLink } = await res.json();`;
 
-  const code = activeTab === "widget" ? widgetCode : apiCode;
-
-  function handleCopy() {
-    navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
+  const tabs = [
+    { id: "widget", label: "embed.html", code: widgetCode },
+    { id: "api", label: "fetch_api.js", code: apiCode },
+  ];
 
   return (
     <section id="how-it-works" className="py-20 md:py-24 border-t border-black/[0.06] bg-white">
@@ -42,7 +35,7 @@ const { position, referralLink } = await res.json();`;
           {/* Left: steps */}
           <div className="lg:col-span-5 space-y-6">
             <div>
-              <p className="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#737373] mb-2">
+              <p className="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#737373] mb-2 font-mono">
                 Setup
               </p>
               <h2 className="text-2xl sm:text-[28px] font-semibold tracking-tight text-[#0A0A0A] mb-2">
@@ -84,64 +77,9 @@ const { position, referralLink } = await res.json();`;
             </div>
           </div>
 
-          {/* Right: tabbed IDE code block matching user reference */}
-          <div className="lg:col-span-7 bg-[#121215] text-zinc-200 border border-white/[0.09] rounded-2xl overflow-hidden shadow-xl">
-            {/* Top Editor Bar */}
-            <div className="flex items-center justify-between px-4 py-2.5 bg-[#18181D] border-b border-white/[0.06]">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#EF4444]/40 border border-[#EF4444]/60" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#F59E0B]/40 border border-[#F59E0B]/60" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#10B981]/40 border border-[#10B981]/60" />
-                </div>
-                <div className="flex gap-1 bg-black/25 p-0.5 rounded-lg border border-white/[0.06]">
-                  {(["widget", "api"] as const).map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={`text-[11.5px] font-mono px-2.5 py-1 rounded-md transition cursor-pointer ${
-                        activeTab === tab
-                          ? "bg-white/[0.12] text-white shadow-xs font-semibold"
-                          : "text-zinc-400 hover:text-zinc-200"
-                      }`}
-                    >
-                      {tab === "widget" ? "embed.html" : "fetch_api.js"}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Clearly visible, tactile Copy Button */}
-              <button
-                type="button"
-                onClick={handleCopy}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[11.5px] font-medium transition cursor-pointer border border-white/10 shadow-xs active:scale-95"
-              >
-                {copied ? (
-                  <>
-                    <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="text-emerald-400 font-semibold">Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-3.5 h-3.5 text-zinc-300" />
-                    <span>Copy Code</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* Code Body with Line Numbers */}
-            <div className="p-4 font-mono text-[12px] text-zinc-300 leading-relaxed overflow-x-auto flex gap-3.5 select-text">
-              <div className="select-none text-zinc-600 text-right pr-2.5 border-r border-white/[0.08] font-mono shrink-0">
-                {code.split('\n').map((_, i) => (
-                  <div key={i}>{i + 1}</div>
-                ))}
-              </div>
-              <div className="overflow-x-auto whitespace-pre font-mono text-zinc-200">
-                <pre>{code}</pre>
-              </div>
-            </div>
+          {/* Right: Unified Standardized CodeBlock */}
+          <div className="lg:col-span-7">
+            <CodeBlock tabs={tabs} />
           </div>
         </div>
       </div>

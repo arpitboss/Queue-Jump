@@ -1,4 +1,4 @@
-﻿# Root gitignore
+# Root gitignore
 node_modules/
 dist/
 .next/
@@ -7,3 +7,9 @@ out/
 *.log
 .DS_Store
 Thumbs.db
+
+# Agent skills and temporary tool artifacts
+.agents/
+.taste-skill/
+.skills/
+skills-lock.json

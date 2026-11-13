@@ -178,7 +178,7 @@ function EmbedContent() {
             <div className={`p-3.5 rounded-xl border text-left flex items-start gap-3 ${
               isDark
                 ? "bg-amber-500/10 border-amber-500/20 text-amber-200"
-                : "bg-amber-50 border-amber-200 text-amber-900"
+                : "bg-amber-500/[0.08] border-amber-500/20 text-amber-900"
             }`}>
               <span className="w-2 h-2 rounded-full bg-amber-400 mt-1.5 shrink-0 animate-pulse" />
               <div className="text-xs">

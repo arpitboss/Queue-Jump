@@ -298,7 +298,7 @@ export default function DashboardPage() {
 
         <div className="bg-white border border-black/[0.08] rounded-xl p-4 shadow-sm">
           <span className="text-[11px] font-medium uppercase tracking-wider text-[#737373] block mb-1">Viral Factor (K)</span>
-          <div className="text-2xl font-semibold text-[#14804A] font-mono tabular-nums">
+          <div className="text-2xl font-semibold text-emerald-700 font-mono tabular-nums">
             {viralKFactor}x
           </div>
           <span className="text-[11.5px] text-[#A1A1A1] mt-0.5 block">{totalReferrals} verified referrals</span>
@@ -426,10 +426,10 @@ export default function DashboardPage() {
                       <td className="py-3 px-4">
                         <span className={`px-2 py-0.5 rounded-full text-[10.5px] font-medium font-sans border ${
                           item.status === "ADMITTED"
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            ? "bg-emerald-500/[0.08] text-emerald-800 border-emerald-500/20"
                             : item.status === "VERIFIED"
-                            ? "bg-blue-50 text-blue-700 border-blue-200"
-                            : "bg-amber-50 text-amber-700 border-amber-200"
+                            ? "bg-black/[0.04] text-[#0A0A0A] border-black/[0.08]"
+                            : "bg-amber-500/[0.08] text-amber-800 border-amber-500/20"
                         }`}>
                           {item.status || "VERIFIED"}
                         </span>
@@ -439,7 +439,7 @@ export default function DashboardPage() {
                           {item.referralCode}
                         </span>
                       </td>
-                      <td className="py-3 px-4 font-semibold text-[#14804A]">
+                      <td className="py-3 px-4 font-semibold text-emerald-700">
                         {item.verifiedReferrals}
                       </td>
                       <td className="py-3 px-4 text-[#737373]">

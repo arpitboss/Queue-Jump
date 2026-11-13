@@ -31,15 +31,20 @@ export function HeroSection() {
             <br className="hidden sm:inline" /> into referrals.
           </h1>
 
-          <p className="text-[15px] sm:text-[16px] text-[#737373] max-w-lg mx-auto leading-relaxed mb-7 font-normal">
+          <p className="text-[15px] sm:text-[16px] text-[#737373] max-w-lg mx-auto leading-relaxed mb-4 font-normal">
             When someone joins your waitlist, QueueJump gives them a spot in line and an invite link. As friends join through their link, they move up.
           </p>
 
-          {/* Tactile Buttons matching vibrant.design: White tactile button + Rich Blue button */}
+          {/* One Hard Fact on Screen 1 — Plain, Human, Reassuring */}
+          <p className="text-[12.5px] text-[#737373] mb-7 font-normal">
+            Free for your first 500 signups · Installs in 60 seconds · No credit card required
+          </p>
+
+          {/* Tactile Buttons: Primary Emerald + Secondary White */}
           <div className="flex items-center justify-center gap-3 mb-8">
             <Link
               href="/dashboard"
-              className="btn-vibrant-primary text-[13.5px] font-medium px-5 py-2.5 gap-1.5"
+              className="btn-vibrant-emerald text-[13.5px] font-medium px-5 py-2.5 gap-2"
             >
               <span>Create your waitlist</span>
               <ArrowRight className="w-3.5 h-3.5" />

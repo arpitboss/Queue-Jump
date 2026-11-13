@@ -46,7 +46,7 @@ export default function LoginPage() {
     try {
       const data = await apiRequest<{ accessToken: string; refreshToken?: string }>("/api/v1/tenants/login", {
         method: "POST",
-        body: JSON.stringify({ email: "demo@queuejump.dev", password: "demopassword123" }),
+        body: JSON.stringify({ email: "demo@queuejump.arpitverma.me", password: "demopassword123" }),
       });
       localStorage.setItem("queuejump_token", data.accessToken);
       if (data.refreshToken) {
@@ -59,7 +59,7 @@ export default function LoginPage() {
           method: "POST",
           body: JSON.stringify({
             name: "Demo Founder",
-            email: `demo_${Date.now()}@queuejump.dev`,
+            email: `demo_${Date.now()}@queuejump.arpitverma.me`,
             password: "demopassword123",
           }),
         });
@@ -100,7 +100,7 @@ export default function LoginPage() {
             disabled={loading}
             className="btn-vibrant-white w-full py-2.5 px-3 text-xs font-medium gap-2 cursor-pointer"
           >
-            <span className="w-2 h-2 rounded-full bg-[#14804A]" />
+            <span className="w-2 h-2 rounded-full bg-[#10B981]" />
             <span>1-Click Instant Demo Access</span>
             <span className="text-[#8C8C8C] font-mono text-[11px]">(Preloaded with sample waitlist)</span>
           </button>
@@ -153,7 +153,7 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="text-xs text-red-700 bg-red-50 border border-red-200/80 p-2.5 rounded-xl">
+              <div className="text-xs text-rose-700 bg-rose-500/[0.08] border border-rose-500/20 p-2.5 rounded-xl">
                 {error}
               </div>
             )}

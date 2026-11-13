@@ -17,7 +17,7 @@ export function CtaSection() {
         <div className="flex items-center justify-center gap-2.5">
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-2 bg-[#0A0A0A] hover:bg-neutral-800 text-white text-[13px] font-medium px-4 py-2 rounded-full transition shadow-sm"
+            className="btn-vibrant-emerald text-[13px] font-medium px-4 py-2 gap-2"
           >
             Create a waitlist <ArrowRight className="w-3.5 h-3.5" />
           </Link>
@@ -25,24 +25,9 @@ export function CtaSection() {
             href={`${API_URL}/api/docs`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-white hover:bg-[#EFEFEF] text-[#0A0A0A] border border-black/[0.08] text-[13px] font-medium px-4 py-2 rounded-full transition"
+            className="btn-vibrant-white text-[13px] font-medium px-4 py-2 gap-2"
           >
             API Documentation
-          </a>
-        </div>
-        <div className="pt-8 flex justify-center">
-          <a
-            href="https://peerlist.io/arpitboss_001/project/queuejump"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-block hover:opacity-85 transition-opacity duration-200 rounded-xl overflow-hidden border border-black/[0.08] shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
-            title="Support QueueJump on Peerlist"
-          >
-            <img
-              src="https://peerlist.io/api/v1/projects/embed/PRJHA9EK9AG6KDMR9HJOAK7PONRGAB?showUpvote=true&theme=light"
-              alt="QueueJump on Peerlist"
-              style={{ width: "auto", height: "52px" }}
-            />
           </a>
         </div>
       </div>
