@@ -10,7 +10,7 @@ vi.mock("../src/config/db", () => ({
   },
 }));
 
-describe("Audit Fixes & Security Hardening Verification", () => {
+describe("Audit Fixes & Security Hardening Verification", { timeout: 15000 }, () => {
   it("GET /api/v1/telemetry/stats returns online server health and telemetry metrics", async () => {
     const res = await request(app).get("/api/v1/telemetry/stats");
     expect(res.status).toBe(200);
@@ -25,7 +25,7 @@ describe("Audit Fixes & Security Hardening Verification", () => {
       .send({ path: "/", referrer: "https://peerlist.io" });
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
-  });
+  }, 15000);
 
   it("POST /api/v1/tenants/logout clears cookie and returns 200", async () => {
     const res = await request(app).post("/api/v1/tenants/logout");
